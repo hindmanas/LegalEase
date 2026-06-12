@@ -1,0 +1,21 @@
+{
+  "name": "ai-legal-document-simplifier",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack AI-powered legal document simplifier with React, Express, MongoDB, JWT auth, file parsing, and AI analysis.",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
+    "dev:client": "npm run dev --workspace client",
+    "dev:server": "npm run dev --workspace server",
+    "build": "npm run build --workspace client",
+    "start": "npm run start --workspace server",
+    "install:all": "npm install --workspaces"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
