@@ -19,6 +19,7 @@ export default function UploadPage() {
   const [uploadedPath, setUploadedPath] = useState('');
   const [uploadError, setUploadError] = useState('');
   const [error, setError] = useState('');
+  const [processingState, setProcessingState] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   function showToast(message, type = 'success') {
@@ -43,15 +44,17 @@ export default function UploadPage() {
     setError('');
   }
 
-  async function handleSupabaseUpload(event) {
+  async function handleUploadAndProcess(event) {
     event.preventDefault();
     if (!file || !user) return;
 
     setUploading(true);
     setUploadError('');
     setError('');
+    setProcessingState('uploading');
 
     try {
+      // 1. Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
       const storagePath = `${user.id}/${fileName}`;
@@ -67,30 +70,15 @@ export default function UploadPage() {
         throw storageError;
       }
 
-      setUploadedPath(data.path);
-      showToast('Document uploaded successfully', 'success');
-    } catch (err) {
-      console.error('Supabase upload error:', err);
-      const errMsg = err.message || err.error_description || 'Unknown error';
-      setUploadError(`Documents not uploaded properly: ${errMsg}. Kindly upload again.`);
-      showToast('Upload failed, please try again', 'error');
-    } finally {
-      setUploading(false);
-    }
-  }
+      const uploadedFilePath = data.path;
+      setUploadedPath(uploadedFilePath);
+      showToast('Document uploaded successfully to storage', 'success');
 
-  async function handleGenerateAnalysis(event) {
-    event.preventDefault();
-    if (!uploadedPath) return;
-
-    setGenerating(true);
-    setError('');
-
-    try {
-      // Generate a signed URL for the document so the backend can download it securely
+      // 2. Generate signed URL for backend to download
+      setProcessingState('extracting');
       const { data: urlData, error: urlError } = await supabase.storage
         .from('documents')
-        .createSignedUrl(uploadedPath, 60 * 15); // Valid for 15 minutes
+        .createSignedUrl(uploadedFilePath, 60 * 15); // Valid for 15 minutes
 
       if (urlError) {
         throw new Error(`Failed to generate secure URL: ${urlError.message}`);
@@ -98,22 +86,34 @@ export default function UploadPage() {
 
       const pdfUrl = urlData.signedUrl;
 
-      // Send the Supabase file path and signed URL to the backend
+      // 3. Send to backend to save in MongoDB and extract text
       const upload = await api.uploadDocument({
         originalName: file.name,
-        supabasePath: uploadedPath,
+        supabasePath: uploadedFilePath,
         pdfUrl: pdfUrl,
         size: file.size,
         mimeType: file.type
       });
 
-      // Rerun analysis
+      showToast('Text extracted and document saved to MongoDB', 'success');
+
+      // 4. Run analysis
       await api.analyzeDocument(upload.document._id);
+      showToast('Analysis completed successfully', 'success');
+      
+      setProcessingState('done');
+      
+      // Navigate to the analysis page
       navigate(`/app/analysis/${upload.document._id}`);
     } catch (err) {
-      setError(err.message);
+      console.error('Upload and process error:', err);
+      const errMsg = err.message || 'Unknown processing error';
+      setError(errMsg);
+      showToast('Processing failed, please try again', 'error');
+      setProcessingState('');
+      setUploadedPath('');
     } finally {
-      setGenerating(false);
+      setUploading(false);
     }
   }
 
@@ -208,34 +208,17 @@ export default function UploadPage() {
               <p className="text-sm text-slate-500">Maximum file size: 10 MB</p>
               
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                {/* Step 1: Upload to Supabase */}
                 <Button
-                  onClick={handleSupabaseUpload}
-                  disabled={!file || uploading || uploadedPath}
-                  className={`w-full sm:w-auto shadow-sm transition-all ${
-                    uploadedPath 
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-default' 
-                      : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                  }`}
+                  onClick={handleUploadAndProcess}
+                  disabled={!file || uploading}
+                  className="w-full sm:w-auto bg-brandBlue hover:bg-blue-700 shadow-sm hover:shadow transition-all text-white font-bold"
                 >
-                  {uploading ? (
-                    <Loader2 size={17} className="animate-spin" />
-                  ) : uploadedPath ? (
-                    <Check size={17} />
-                  ) : (
-                    <UploadCloud size={17} />
-                  )}
-                  {uploading ? 'Uploading...' : uploadedPath ? 'Uploaded' : 'Upload'}
-                </Button>
-
-                {/* Step 2: Generate Analysis via Backend */}
-                <Button
-                  onClick={handleGenerateAnalysis}
-                  disabled={!uploadedPath || generating}
-                  className="w-full sm:w-auto bg-brandBlue hover:bg-blue-700 shadow-sm hover:shadow transition-all"
-                >
-                  {generating && <Loader2 size={17} className="animate-spin" />}
-                  {generating ? 'Extracting and analyzing...' : 'Generate analysis'}
+                  {uploading && <Loader2 size={17} className="animate-spin" />}
+                  {processingState === 'uploading'
+                    ? 'Uploading to storage...'
+                    : processingState === 'extracting'
+                    ? 'Extracting text and analyzing...'
+                    : 'Upload and Analyze'}
                 </Button>
               </div>
             </div>
