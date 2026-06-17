@@ -19,16 +19,32 @@ export async function uploadDocument(req, res, next) {
       size = req.file.size;
       mimeType = req.file.mimetype;
 
-      extractedText = await extractTextFromFile(req.file);
+      // 1. Upload to Supabase Storage first (or returns local path if skipped)
+      supabasePath = await uploadToSupabase(req.file, req.user._id);
+
+      if (supabasePath === req.file.path) {
+        // Supabase was skipped/not configured. Extract text from the local file.
+        extractedText = await extractTextFromFile(req.file);
+        // Cleanup local copy
+        await fs.unlink(req.file.path).catch((err) => {
+          console.error('Failed to delete temporary local file:', err);
+        });
+      } else {
+        // Cleanup local copy
+        await fs.unlink(req.file.path).catch((err) => {
+          console.error('Failed to delete temporary local file:', err);
+        });
+
+        // 2 & 3. Read PDF from Supabase Storage
+        const buffer = await downloadFromSupabase(supabasePath, req.headers.authorization);
+
+        // 4. Extract text from the downloaded buffer
+        extractedText = await extractTextFromBuffer(buffer, mimeType);
+      }
+
       if (!extractedText.trim()) {
         throw new AppError('No readable text could be extracted from this file', 422);
       }
-
-      // Upload to Supabase Storage and cleanup local copy
-      supabasePath = await uploadToSupabase(req.file, req.user._id);
-      await fs.unlink(req.file.path).catch((err) => {
-        console.error('Failed to delete temporary local file:', err);
-      });
     } else if (req.body.pdfUrl || req.body.supabasePath) {
       // Flow 2: Direct Supabase Upload (JSON payload containing url or path)
       const { pdfUrl } = req.body;
