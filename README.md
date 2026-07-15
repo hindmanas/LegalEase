@@ -43,3 +43,5 @@ GEMINI_API_KEY=your_key
 Without a key, the backend uses a deterministic local fallback so the portfolio flow remains demoable.
 Updating the functionalities:
 Added the multilanguage model in the plateform
+
+Now we are adding the google gemini_api_key to get the results in more structured way
