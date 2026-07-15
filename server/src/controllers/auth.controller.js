@@ -9,6 +9,7 @@ function sanitizeUser(user) {
     _id: user._id,
     name: user.name,
     email: user.email,
+    language: user.language || 'en',
     createdAt: user.createdAt
   };
 }
@@ -69,9 +70,10 @@ export function me(req, res) {
 
 export async function updateProfile(req, res, next) {
   try {
-    const { name, email } = req.body;
+    const { name, email, language } = req.body;
     req.user.name = name || req.user.name;
     req.user.email = email || req.user.email;
+    req.user.language = language || req.user.language;
     await req.user.save();
     res.json({ user: sanitizeUser(req.user) });
   } catch (error) {

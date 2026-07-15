@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileUp, Loader2, UploadCloud, CheckCircle, AlertCircle, Check } from 'lucide-react';
+import { FileUp, Loader2, UploadCloud, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { supabase } from '../lib/supabase.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Button from '../components/ui/Button.jsx';
 import Card from '../components/ui/Card.jsx';
 import PageTransition from '../components/ui/PageTransition.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function UploadPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [generating, setGenerating] = useState(false);
   const [uploadedPath, setUploadedPath] = useState('');
   const [uploadError, setUploadError] = useState('');
   const [error, setError] = useState('');
@@ -35,7 +36,7 @@ export default function UploadPage() {
     const nextFile = event.target.files?.[0] || null;
     if (nextFile && nextFile.size > MAX_FILE_SIZE) {
       setFile(null);
-      setUploadError('File size exceeds the 10 MB limit. Please select a smaller file.');
+      setUploadError(t('upload.errorSize'));
       return;
     }
     setFile(nextFile);
@@ -72,7 +73,7 @@ export default function UploadPage() {
 
       const uploadedFilePath = data.path;
       setUploadedPath(uploadedFilePath);
-      showToast('Document uploaded successfully to storage', 'success');
+      showToast(t('upload.toastUploadSuccess'), 'success');
 
       // 2. Generate signed URL for backend to download
       setProcessingState('extracting');
@@ -95,11 +96,11 @@ export default function UploadPage() {
         mimeType: file.type
       });
 
-      showToast('Text extracted and document saved to MongoDB', 'success');
+      showToast(t('upload.toastExtractSuccess'), 'success');
 
       // 4. Run analysis
       await api.analyzeDocument(upload.document._id);
-      showToast('Analysis completed successfully', 'success');
+      showToast(t('upload.toastAnalysisSuccess'), 'success');
       
       setProcessingState('done');
       
@@ -107,9 +108,9 @@ export default function UploadPage() {
       navigate(`/app/analysis/${upload.document._id}`);
     } catch (err) {
       console.error('Upload and process error:', err);
-      const errMsg = err.message || 'Unknown processing error';
+      const errMsg = err.message || t('upload.toastFailed');
       setError(errMsg);
-      showToast('Processing failed, please try again', 'error');
+      showToast(t('upload.toastFailed'), 'error');
       setProcessingState('');
       setUploadedPath('');
     } finally {
@@ -124,7 +125,7 @@ export default function UploadPage() {
     if (nextFile) {
       if (nextFile.size > MAX_FILE_SIZE) {
         setFile(null);
-        setUploadError('File size exceeds the 10 MB limit. Please select a smaller file.');
+        setUploadError(t('upload.errorSize'));
         return;
       }
       setFile(nextFile);
@@ -156,9 +157,9 @@ export default function UploadPage() {
         )}
 
         <div className="mb-7 animate-fade-up">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brandBlue">Upload</p>
-          <h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Add a legal document</h1>
-          <p className="mt-2 text-slate-600">Upload to secure storage, then trigger dynamic text extraction and AI analysis.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brandBlue">{t('upload.tag')}</p>
+          <h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">{t('upload.title')}</h1>
+          <p className="mt-2 text-slate-600">{t('upload.subtitle')}</p>
         </div>
 
         <Card className="p-5 sm:p-8 animate-fade-up" style={{ animationDelay: '0.1s' }}>
@@ -183,9 +184,9 @@ export default function UploadPage() {
               <div className="grid size-16 place-items-center rounded-lg bg-white shadow-sm border border-slate-100">
                 {file ? <FileUp size={28} className="text-brandBlue" /> : <UploadCloud size={30} className="text-brandBlue" />}
               </div>
-              <h2 className="mt-5 font-display text-2xl font-bold">{file ? file.name : 'Drop your file here'}</h2>
+              <h2 className="mt-5 font-display text-2xl font-bold">{file ? file.name : t('upload.dropzoneTitle')}</h2>
               <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-                {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB selected` : 'Choose a contract, agreement, policy, NDA, notice, or rental file.'}
+                {file ? t('upload.selectedFile', { size: (file.size / 1024 / 1024).toFixed(2) }) : t('upload.dropzoneDesc')}
               </p>
             </label>
 
@@ -205,7 +206,7 @@ export default function UploadPage() {
             )}
 
             <div className="mt-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <p className="text-sm text-slate-500">Maximum file size: 10 MB</p>
+              <p className="text-sm text-slate-500">{t('upload.maxSizeLabel')}</p>
               
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <Button
@@ -215,10 +216,10 @@ export default function UploadPage() {
                 >
                   {uploading && <Loader2 size={17} className="animate-spin" />}
                   {processingState === 'uploading'
-                    ? 'Uploading to storage...'
+                    ? t('upload.stateUploading')
                     : processingState === 'extracting'
-                    ? 'Extracting text and analyzing...'
-                    : 'Upload and Analyze'}
+                    ? t('upload.stateExtracting')
+                    : t('upload.stateAction')}
                 </Button>
               </div>
             </div>

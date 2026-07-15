@@ -14,7 +14,11 @@ export async function analyzeDocument(req, res, next) {
       throw new AppError('Document not found', 404);
     }
 
-    const analysis = await analyzeLegalText(document.extractedText);
+    const language = req.headers['x-user-language'] || req.headers['accept-language'] || req.user?.language || 'en';
+    const languageMap = { en: 'English', hi: 'Hindi', gu: 'Gujarati' };
+    const targetLanguage = languageMap[language.split(',')[0].slice(0, 2)] || 'English';
+
+    const analysis = await analyzeLegalText(document.extractedText, targetLanguage);
     document.analysis = analysis;
     document.status = 'analyzed';
     await document.save();

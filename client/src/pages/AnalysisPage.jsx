@@ -6,10 +6,17 @@ import Button from '../components/ui/Button.jsx';
 import Card from '../components/ui/Card.jsx';
 import PageTransition from '../components/ui/PageTransition.jsx';
 import Skeleton from '../components/ui/Skeleton.jsx';
+import { useTranslation } from 'react-i18next';
 
 function RiskBadge({ level }) {
+  const { t } = useTranslation();
   const color = level === 'high' ? 'bg-clay/10 text-clay' : level === 'medium' ? 'bg-brass/15 text-[#8a5c1d]' : 'bg-fern/10 text-fern';
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-bold capitalize ${color}`}>{level || 'low'}</span>;
+  const labelMap = {
+    high: t('common.high', 'High'),
+    medium: t('common.medium', 'Medium'),
+    low: t('common.low', 'Low')
+  };
+  return <span className={`rounded-full px-2.5 py-1 text-xs font-bold capitalize ${color}`}>{labelMap[level] || labelMap.low}</span>;
 }
 
 export default function AnalysisPage() {
@@ -18,6 +25,7 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   async function load() {
     const data = await api.getDocument(id);
@@ -58,26 +66,26 @@ export default function AnalysisPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-fern">Analysis</p>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-fern">{t('analysis.tag')}</p>
             <h1 className="mt-2 max-w-4xl font-display text-3xl font-bold sm:text-4xl">{document?.originalName}</h1>
-            <p className="mt-2 text-slate-600">Plain-language report, clause extraction, and risk highlights.</p>
+            <p className="mt-2 text-slate-600">{t('analysis.subtitle')}</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Link to={`/app/chat/${id}`}>
               <Button variant="secondary" className="w-full sm:w-auto">
                 <MessageSquareText size={17} />
-                Chat
+                {t('analysis.btnChat')}
               </Button>
             </Link>
             <a href={api.downloadReport(id)} target="_blank" rel="noreferrer">
               <Button variant="secondary" className="w-full sm:w-auto">
                 <Download size={17} />
-                Report
+                {t('analysis.btnReport')}
               </Button>
             </a>
             <Button onClick={rerunAnalysis} disabled={analyzing} className="w-full sm:w-auto">
               <RefreshCw size={17} className={analyzing ? 'animate-spin' : ''} />
-              Re-analyze
+              {t('analysis.btnReanalyze')}
             </Button>
           </div>
         </div>
@@ -87,9 +95,9 @@ export default function AnalysisPage() {
         {!analysis ? (
           <Card className="p-8 text-center">
             <FileText size={34} className="mx-auto text-sage" />
-            <h2 className="mt-4 font-display text-xl font-bold">No analysis generated yet</h2>
-            <p className="mt-2 text-sm text-slate-600">Run analysis to simplify this document.</p>
-            <Button onClick={rerunAnalysis} className="mt-5">Generate analysis</Button>
+            <h2 className="mt-4 font-display text-xl font-bold">{t('analysis.noAnalysisTitle')}</h2>
+            <p className="mt-2 text-sm text-slate-600">{t('analysis.noAnalysisDesc')}</p>
+            <Button onClick={rerunAnalysis} className="mt-5">{t('analysis.btnGenerate')}</Button>
           </Card>
         ) : (
           <>
@@ -98,7 +106,7 @@ export default function AnalysisPage() {
               <Card className="p-6">
                 <h2 className="font-display text-xl font-bold flex items-center gap-2">
                   <Info size={19} className="text-brandBlue" />
-                  Document Overview
+                  {t('analysis.overviewTitle')}
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-slate-700 whitespace-pre-line">
                   {analysis.documentOverview || analysis.summary}
@@ -108,7 +116,7 @@ export default function AnalysisPage() {
               <Card className="p-6">
                 <h2 className="font-display text-xl font-bold flex items-center gap-2">
                   <Sparkles size={19} className="text-brandBlue" />
-                  Key Information
+                  {t('analysis.keyInfoTitle')}
                 </h2>
                 {analysis.keyInformation ? (
                   <ul className="space-y-3 mt-4 text-sm text-slate-700">
@@ -120,7 +128,7 @@ export default function AnalysisPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-4 text-sm text-slate-500">Metadata not parsed from document.</p>
+                  <p className="mt-4 text-sm text-slate-500">{t('analysis.keyInfoEmpty')}</p>
                 )}
               </Card>
             </div>
@@ -130,7 +138,7 @@ export default function AnalysisPage() {
               <Card className="p-6">
                 <h2 className="font-display text-xl font-bold flex items-center gap-2">
                   <FileText size={19} className="text-brandBlue" />
-                  Important Clauses
+                  {t('analysis.clausesTitle')}
                 </h2>
                 <div className="mt-4 space-y-3">
                   {analysis.clauses?.length ? analysis.clauses.map((clause, index) => (
@@ -142,7 +150,7 @@ export default function AnalysisPage() {
                       <p className="mt-2 text-sm leading-6 text-slate-600">{clause.explanation}</p>
                     </div>
                   )) : (
-                    <p className="text-sm text-slate-500">No specific clauses listed.</p>
+                    <p className="text-sm text-slate-500">{t('analysis.clausesEmpty')}</p>
                   )}
                 </div>
               </Card>
@@ -150,7 +158,7 @@ export default function AnalysisPage() {
               <Card className="p-6">
                 <h2 className="font-display text-xl font-bold flex items-center gap-2 text-clay">
                   <ShieldAlert size={19} className="text-clay" />
-                  Risks & Red Flags
+                  {t('analysis.risksTitle')}
                 </h2>
                 <div className="mt-4 space-y-3">
                   {analysis.risks?.length ? analysis.risks.map((risk, index) => (
@@ -163,7 +171,7 @@ export default function AnalysisPage() {
                       {risk.suggestion && <p className="mt-3 text-sm font-semibold text-clay">{risk.suggestion}</p>}
                     </div>
                   )) : (
-                    <p className="text-sm text-slate-600">No high-risk language was detected in the current analysis.</p>
+                    <p className="text-sm text-slate-600">{t('analysis.risksEmpty')}</p>
                   )}
                 </div>
               </Card>
@@ -173,7 +181,7 @@ export default function AnalysisPage() {
             <Card className="p-6 border border-amber-200 bg-amber-50/5">
               <h2 className="font-display text-xl font-bold text-amber-700 flex items-center gap-2">
                 <DollarSign size={19} className="text-amber-600" />
-                Potential Hidden Charges & Penalties
+                {t('analysis.chargesTitle')}
               </h2>
               <div className="mt-4 space-y-3">
                 {analysis.hiddenCharges?.length ? analysis.hiddenCharges.map((charge, index) => (
@@ -194,14 +202,14 @@ export default function AnalysisPage() {
                     )}
                   </div>
                 )) : (
-                  <p className="text-sm text-slate-600">No hidden charges or unusual financial penalties were highlighted in the analysis.</p>
+                  <p className="text-sm text-slate-600">{t('analysis.chargesEmpty')}</p>
                 )}
               </div>
             </Card>
 
             {/* Row 4: Plain English Summary */}
             <Card className="p-6">
-              <h2 className="font-display text-xl font-bold">Plain English Summary</h2>
+              <h2 className="font-display text-xl font-bold">{t('analysis.summaryTitle')}</h2>
               <div className="mt-4 rounded-lg bg-mist p-5 text-sm leading-7 text-slate-700 whitespace-pre-wrap">
                 {analysis.simplifiedText}
               </div>
@@ -214,13 +222,13 @@ export default function AnalysisPage() {
                   <MessageSquare size={22} />
                 </div>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-blue-900">Have questions about this document?</h3>
-                  <p className="text-sm text-blue-700 mt-0.5">Use our dedicated conversational assistant to clarify clauses, search key terms, and get answers.</p>
+                  <h3 className="font-display text-lg font-bold text-blue-900">{t('analysis.chatCalloutTitle')}</h3>
+                  <p className="text-sm text-blue-700 mt-0.5">{t('analysis.chatCalloutDesc')}</p>
                 </div>
               </div>
               <Link to={`/app/chat/${id}`}>
                 <Button className="bg-brandBlue hover:bg-blue-700 shadow-sm shrink-0">
-                  Chat With AI
+                  {t('analysis.chatCalloutBtn')}
                 </Button>
               </Link>
             </Card>

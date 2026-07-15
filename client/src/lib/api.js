@@ -14,12 +14,14 @@ async function authHeaders() {
 async function request(path, options = {}) {
   const isFormData = options.body instanceof FormData;
   const headers = await authHeaders();
+  const currentLang = localStorage.getItem('language') || 'en';
   
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...headers,
+      'x-user-language': currentLang,
       ...options.headers
     }
   });

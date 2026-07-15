@@ -19,7 +19,11 @@ export async function chatWithDocument(req, res, next) {
       throw new AppError('Document not found', 404);
     }
 
-    const answer = await answerDocumentQuestion(document, question.trim());
+    const language = req.headers['x-user-language'] || req.headers['accept-language'] || req.user?.language || 'en';
+    const languageMap = { en: 'English', hi: 'Hindi', gu: 'Gujarati' };
+    const targetLanguage = languageMap[language.split(',')[0].slice(0, 2)] || 'English';
+
+    const answer = await answerDocumentQuestion(document, question.trim(), targetLanguage);
     res.json({ answer });
   } catch (error) {
     next(error);

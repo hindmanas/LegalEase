@@ -2,8 +2,11 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Bot, Share2, Shield, FileCheck2, ShieldAlert, FileText, Scale } from 'lucide-react';
 import PageTransition from '../components/ui/PageTransition.jsx';
 import Navbar from '../components/layout/Navbar.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function LandingPage() {
+  const { t } = useTranslation();
+
   return (
     <PageTransition>
       <div className="min-h-screen overflow-x-hidden text-ink relative">
@@ -15,27 +18,27 @@ export default function LandingPage() {
           <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center animate-fade-up">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-white/50 backdrop-blur-sm px-4 py-1.5 text-xs font-bold text-slate-600 shadow-sm animate-float">
               <span className="w-2 h-2 rounded-full bg-brandBlue animate-pulse"></span>
-              Enterprise-grade document intelligence
+              {t('landing.badge')}
             </div>
             
             <h1 className="max-w-4xl font-display text-5xl font-extrabold leading-[1.1] tracking-tight text-ink sm:text-6xl lg:text-[5rem]">
-              Accelerate your <br/>
-              <span className="text-slate-400">contract review cycle.</span>
+              {t('landing.title1')} <br/>
+              <span className="text-slate-400">{t('landing.title2')}</span>
             </h1>
             
             <p className="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed text-slate-600 font-medium">
-              LegalEase is a precision tool built for legal professionals. Instantly identify non-standard clauses, assess risk exposure, and generate clear summaries without losing critical nuances.
+              {t('landing.subtitle')}
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Link to="/register" className="w-full sm:w-auto">
                 <button className="w-full bg-brandBlue text-white hover:bg-blue-700 transition-all duration-300 px-8 py-3.5 rounded-xl text-sm font-semibold flex justify-center items-center gap-2 shadow-glow hover:shadow-float hover:-translate-y-1">
-                  Start analyzing <ArrowRight size={18} />
+                  {t('landing.startBtn')} <ArrowRight size={18} />
                 </button>
               </Link>
               <a href="#workflow" className="w-full sm:w-auto">
                 <button className="w-full bg-white text-ink border border-line hover:border-slate-300 transition-all duration-300 px-8 py-3.5 rounded-xl text-sm font-semibold flex justify-center items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-1">
-                  Explore workflow
+                  {t('landing.exploreBtn')}
                 </button>
               </a>
             </div>
@@ -63,7 +66,7 @@ export default function LandingPage() {
                   <div className="hidden sm:block w-48 border-r border-line p-4 space-y-4">
                     <div className="h-4 w-20 bg-slate-100 rounded"></div>
                     <div className="h-4 w-16 bg-slate-100 rounded"></div>
-                    <div className="h-8 w-full bg-blue-50 text-brandBlue rounded flex items-center px-3 text-xs font-bold">Analysis</div>
+                    <div className="h-8 w-full bg-blue-50 text-brandBlue rounded flex items-center px-3 text-xs font-bold">{t('common.appName')}</div>
                   </div>
                   {/* Main Content */}
                   <div className="flex-1 p-6 flex flex-col gap-6 overflow-hidden">
@@ -93,18 +96,18 @@ export default function LandingPage() {
           {/* Workflow Section */}
           <section id="workflow" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 mt-12">
             <div className="mb-12">
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-brandBlue mb-4">How it works</p>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-brandBlue mb-4">{t('landing.workflowTitle')}</p>
               <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight max-w-lg leading-tight">
-                Streamline your document processing.
+                {t('landing.workflowSubtitle')}
               </h2>
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-0 rounded-2xl border border-line bg-white/40 overflow-hidden shadow-sm backdrop-blur-sm">
               {[
-                ['01', 'Upload', 'Submit your contracts in standard formats like PDF or DOCX.'],
-                ['02', 'Parse', 'The system rapidly extracts key clauses, entities, and governing terms.'],
-                ['03', 'Analyze', 'We compare extracted clauses against established market standards.'],
-                ['04', 'Resolve', 'Review flagged issues and implement targeted revisions instantly.']
+                ['01', t('landing.step1Title'), t('landing.step1Desc')],
+                ['02', t('landing.step2Title'), t('landing.step2Desc')],
+                ['03', t('landing.step3Title'), t('landing.step3Desc')],
+                ['04', t('landing.step4Title'), t('landing.step4Desc')]
               ].map(([num, title, copy], i) => (
                 <div key={num} className={`p-8 hover:bg-white transition-colors duration-300 ${i !== 3 ? 'border-b sm:border-b-0 sm:border-r border-line' : ''}`}>
                   <span className="text-xs font-bold text-brandBlue">{num}</span>
@@ -119,13 +122,13 @@ export default function LandingPage() {
           <section className="py-16 flex justify-center px-4">
              <div className="max-w-3xl text-center">
                 <h3 className="font-display text-3xl sm:text-4xl font-semibold leading-tight text-ink mb-6">
-                  "LegalEase AI cut our contract turnaround from days to hours."
+                  {t('landing.testimonial')}
                 </h3>
                 <div className="flex items-center justify-center gap-3">
                    <div className="w-10 h-10 rounded-full bg-slate-200"></div>
                    <div className="text-left">
-                      <div className="text-sm font-bold text-ink">Akshat Dave</div>
-                      <div className="text-xs text-slate-500">Student</div>
+                      <div className="text-sm font-bold text-ink">{t('landing.testimonialAuthor')}</div>
+                      <div className="text-xs text-slate-500">{t('landing.testimonialRole')}</div>
                    </div>
                 </div>
              </div>
@@ -134,20 +137,20 @@ export default function LandingPage() {
           {/* Features Section */}
           <section id="features" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
             <div className="mb-12">
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-brandBlue mb-4">Features</p>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-brandBlue mb-4">{t('landing.featuresTitle')}</p>
               <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight max-w-xl leading-tight">
-                Designed to handle complex legal review.
+                {t('landing.featuresSubtitle')}
               </h2>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                [ShieldAlert, 'Automated Risk Detection', 'Immediately flag irregular indemnity, liability, and termination clauses with contextual references.'],
-                [FileText, 'Contextual Comparison', 'View your source document side-by-side with clear, actionable interpretations.'],
-                [Bot, 'Interactive Guidance', 'Query specific clauses directly and receive answers anchored strictly in the source text.'],
-                [Share2, 'Seamless Integration', 'Export finalized drafts directly into your existing workflow or signature pipeline.'],
-                [Shield, 'Secure Architecture', 'Built with robust encryption standards. Your proprietary data is never exposed to public models.'],
-                [FileCheck2, 'Executive Summaries', 'Generate concise, non-technical overviews suitable for broader stakeholder alignment.']
+                [ShieldAlert, t('landing.feat1Title'), t('landing.feat1Desc')],
+                [FileText, t('landing.feat2Title'), t('landing.feat2Desc')],
+                [Bot, t('landing.feat3Title'), t('landing.feat3Desc')],
+                [Share2, t('landing.feat4Title'), t('landing.feat4Desc')],
+                [Shield, t('landing.feat5Title'), t('landing.feat5Desc')],
+                [FileCheck2, t('landing.feat6Title'), t('landing.feat6Desc')]
               ].map(([Icon, title, copy]) => (
                 <div key={title} className="glass-card p-8 group relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-brandBlue/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
@@ -172,14 +175,14 @@ export default function LandingPage() {
 
               <div className="relative z-10">
                 <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight mb-6">
-                  Optimize your legal workflow today.
+                  {t('landing.ctaTitle')}
                 </h2>
                 <p className="text-slate-300 text-lg mb-10 max-w-lg mx-auto">
-                  Access your secure workspace and begin analyzing complex documents in seconds.
+                  {t('landing.ctaDesc')}
                 </p>
                 <Link to="/register">
                   <button className="bg-white text-ink hover:bg-slate-100 transition-all duration-300 px-8 py-3.5 rounded-xl text-sm font-bold inline-flex justify-center items-center gap-2 hover:-translate-y-1 shadow-lg">
-                    Open dashboard <ArrowRight size={18} />
+                    {t('landing.ctaBtn')} <ArrowRight size={18} />
                   </button>
                 </Link>
               </div>
@@ -195,12 +198,12 @@ export default function LandingPage() {
               <div className="grid size-6 place-items-center rounded bg-brandBlue text-white">
                 <Scale size={12} />
               </div>
-              <span className="text-sm font-medium">© 2026 LegalEase AI. All rights reserved.</span>
+              <span className="text-sm font-medium">{t('landing.rightsReserved')}</span>
             </div>
             <div className="flex gap-6 text-sm font-semibold text-slate-400">
-              <a href="#" className="hover:text-ink transition-colors">PRIVACY</a>
-              <a href="#" className="hover:text-ink transition-colors">TERMS</a>
-              <a href="#" className="hover:text-ink transition-colors">SECURITY</a>
+              <a href="#" className="hover:text-ink transition-colors">{t('landing.privacy')}</a>
+              <a href="#" className="hover:text-ink transition-colors">{t('landing.terms')}</a>
+              <a href="#" className="hover:text-ink transition-colors">{t('landing.security')}</a>
             </div>
           </div>
         </footer>

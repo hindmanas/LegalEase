@@ -6,6 +6,7 @@ import Input from '../components/ui/Input.jsx';
 import PageTransition from '../components/ui/PageTransition.jsx';
 import Navbar from '../components/layout/Navbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTranslation } from 'react-i18next';
 
 // Custom Google Icon Component
 const GoogleIcon = () => (
@@ -26,6 +27,7 @@ export default function AuthPage({ mode }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -38,12 +40,20 @@ export default function AuthPage({ mode }) {
         navigate('/app/dashboard');
       } else {
         await register(form);
-        // Supabase might require email verification, handle UI accordingly
-        setError('Account created! Please check your email to verify before logging in, or you may be logged in automatically.');
+        setError(t('auth.accCreated'));
         setTimeout(() => navigate('/app/dashboard'), 2000);
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during authentication.');
+      // Localize standard backend validation messages
+      let message = err.message || t('auth.authError');
+      if (message.includes('Name, email, and password are required')) {
+        message = t('auth.nameRequired');
+      } else if (message.includes('Password must be at least 8 characters')) {
+        message = t('auth.passLength');
+      } else if (message.includes('Invalid email or password') || message.includes('Invalid login credentials')) {
+        message = t('auth.invalidCreds');
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -54,9 +64,8 @@ export default function AuthPage({ mode }) {
     setGoogleLoading(true);
     try {
       await loginWithGoogle();
-      // OAuth redirects, so we don't navigate here manually
     } catch (err) {
-      setError(err.message || 'Failed to authenticate with Google.');
+      setError(err.message || t('auth.authError'));
       setGoogleLoading(false);
     }
   }
@@ -73,14 +82,14 @@ export default function AuthPage({ mode }) {
             <section className="w-full lg:w-1/2 flex flex-col justify-center text-center lg:text-left animate-fade-up">
               <div className="mx-auto lg:mx-0 mb-6 inline-flex items-center gap-2 rounded-full border border-brandBlue/20 bg-brandBlue/5 px-4 py-1.5 text-xs font-bold text-brandBlue">
                 <ShieldCheck size={16} />
-                Secure authentication
+                {t('auth.secureAuth')}
               </div>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-                Your workspace for <br/>
-                <span className="text-brandBlue">smarter legal review.</span>
+                {t('auth.heroTitle')} <br/>
+                <span className="text-brandBlue">{t('auth.heroTitleSub')}</span>
               </h1>
               <p className="mt-6 text-lg text-slate-600 max-w-lg mx-auto lg:mx-0">
-                Join LegalEase AI to securely upload, analyze, and manage your contracts in one centralized dashboard.
+                {t('auth.heroDesc')}
               </p>
             </section>
 
@@ -91,9 +100,11 @@ export default function AuthPage({ mode }) {
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-brandBlue/10 rounded-full blur-[60px] pointer-events-none"></div>
 
                 <div className="relative z-10">
-                  <h2 className="font-display text-3xl font-bold">{isLogin ? 'Welcome back' : 'Create an account'}</h2>
+                  <h2 className="font-display text-3xl font-bold">
+                    {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
+                  </h2>
                   <p className="mt-2 text-sm text-slate-500">
-                    {isLogin ? 'Sign in to access your analysis history.' : 'Start your secure document intelligence journey.'}
+                    {isLogin ? t('auth.signInDesc') : t('auth.signUpDesc')}
                   </p>
 
                   <div className="mt-8 space-y-4">
@@ -103,43 +114,45 @@ export default function AuthPage({ mode }) {
                       className="w-full bg-white border border-line text-ink hover:bg-slate-50 transition-all duration-300 px-5 py-3 rounded-xl font-bold flex justify-center items-center gap-3 shadow-sm hover:shadow hover:-translate-y-0.5 disabled:opacity-70"
                     >
                       <GoogleIcon />
-                      {googleLoading ? 'Connecting...' : `Continue with Google`}
+                      {googleLoading ? t('common.loading') : t('auth.continueGoogle')}
                     </button>
 
                     <div className="relative flex items-center py-2">
                       <div className="flex-grow border-t border-line"></div>
-                      <span className="flex-shrink-0 mx-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Or continue with email</span>
+                      <span className="flex-shrink-0 mx-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                        {t('auth.orEmail')}
+                      </span>
                       <div className="flex-grow border-t border-line"></div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                       {!isLogin && (
                         <Input
-                          label="Full name"
+                          label={t('auth.fullName')}
                           value={form.name}
                           onChange={(event) => setForm({ ...form, name: event.target.value })}
-                          placeholder="Alex Morgan"
+                          placeholder={t('auth.fullNamePlaceholder')}
                           required
                         />
                       )}
                       <Input
-                        label="Work email"
+                        label={t('auth.email')}
                         type="email"
                         value={form.email}
                         onChange={(event) => setForm({ ...form, email: event.target.value })}
-                        placeholder="you@company.com"
+                        placeholder={t('auth.emailPlaceholder')}
                         required
                       />
                       <Input
-                        label="Password"
+                        label={t('auth.password')}
                         type="password"
                         value={form.password}
                         onChange={(event) => setForm({ ...form, password: event.target.value })}
-                        placeholder="At least 8 characters"
+                        placeholder={t('auth.passwordPlaceholder')}
                         required
                       />
                       {error && (
-                        <p className={`rounded-lg px-3 py-2 text-sm font-semibold ${error.includes('Account created') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                        <p className={`rounded-lg px-3 py-2 text-sm font-semibold ${error.includes('Account created') || error.includes('सफलतापूर्वक') || error.includes('ખાતું બની ગયું') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                           {error}
                         </p>
                       )}
@@ -149,15 +162,15 @@ export default function AuthPage({ mode }) {
                         disabled={loading || googleLoading}
                         className="w-full bg-brandBlue text-white hover:bg-blue-700 transition-all duration-300 px-5 py-3 rounded-xl font-bold flex justify-center items-center shadow-glow hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-70"
                       >
-                        {loading ? 'Processing...' : isLogin ? 'Sign in' : 'Create account'}
+                        {loading ? t('auth.processing') : isLogin ? t('auth.signInBtn') : t('auth.createAccBtn')}
                       </button>
                     </form>
                   </div>
 
                   <p className="mt-8 text-center text-sm font-medium text-slate-600">
-                    {isLogin ? 'New to LegalEase AI?' : 'Already have an account?'}{' '}
+                    {isLogin ? t('auth.newToApp') : t('auth.alreadyHaveAcc')}{' '}
                     <Link to={isLogin ? '/register' : '/login'} className="text-brandBlue hover:text-blue-800 transition-colors">
-                      {isLogin ? 'Create account' : 'Sign in'}
+                      {isLogin ? t('auth.createAccBtn') : t('auth.signInBtn')}
                     </Link>
                   </p>
                 </div>

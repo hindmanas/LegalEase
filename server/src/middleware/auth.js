@@ -38,6 +38,7 @@ export async function authenticate(req, _res, next) {
     if (isMemoryStore()) {
       // Memory store logic (for local development without MongoDB)
       user = await findUserById(payload.sub || payload.id);
+      
       // Auto-create user in memory store if using Supabase and missing
       if (!user && payload.email) {
         // Pseudo logic for memory store sync
@@ -46,9 +47,17 @@ export async function authenticate(req, _res, next) {
           _id: payload.sub,
           email: payload.email,
           name: payload.user_metadata?.name || payload.email.split('@')[0],
+          language: payload.user_metadata?.language || 'en',
           passwordHash: 'oauth',
         };
         users.push(user);
+        
+        // Add helper save method manually to new memory record if needed
+        const { attachSave, users: collection } = await import('../repositories/memoryStore.js');
+        user = attachSave(collection, user);
+      } else if (user && payload.user_metadata?.language && user.language !== payload.user_metadata.language) {
+        user.language = payload.user_metadata.language;
+        await user.save();
       }
     } else {
       // MongoDB logic
@@ -62,8 +71,12 @@ export async function authenticate(req, _res, next) {
           user = await User.create({
             email: payload.email.toLowerCase(),
             name: payload.user_metadata?.name || payload.email.split('@')[0],
+            language: payload.user_metadata?.language || 'en',
             passwordHash: 'oauth-or-supabase-managed' // password handled by supabase
           });
+        } else if (payload.user_metadata?.language && user.language !== payload.user_metadata.language) {
+          user.language = payload.user_metadata.language;
+          await user.save();
         }
       } else {
         // Fallback for legacy custom JWT

@@ -5,19 +5,26 @@ import { api } from '../lib/api.js';
 import Button from '../components/ui/Button.jsx';
 import Card from '../components/ui/Card.jsx';
 import PageTransition from '../components/ui/PageTransition.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function ChatPage() {
   const { id } = useParams();
+  const { t } = useTranslation();
   const [document, setDocument] = useState(null);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: 'Ask me about obligations, risks, deadlines, renewal terms, liability, or anything else in this document.'
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
+
+  // Initialize greeting message using t() after component mounts and t is loaded
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: t('chat.initialMessage')
+      }
+    ]);
+  }, [t]);
 
   useEffect(() => {
     api.getDocument(id).then((data) => setDocument(data.document));
@@ -53,10 +60,10 @@ export default function ChatPage() {
           <div>
             <Link to={`/app/analysis/${id}`} className="mb-3 inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-ink">
               <ArrowLeft size={16} />
-              Back to analysis
+              {t('chat.backLink')}
             </Link>
-            <h1 className="font-display text-3xl font-bold">Chat with document</h1>
-            <p className="mt-2 max-w-2xl truncate text-slate-600">{document?.originalName || 'Loading document...'}</p>
+            <h1 className="font-display text-3xl font-bold">{t('chat.title')}</h1>
+            <p className="mt-2 max-w-2xl truncate text-slate-600">{document?.originalName || '...'}</p>
           </div>
         </div>
 
@@ -84,7 +91,7 @@ export default function ChatPage() {
                 <div className="grid size-9 place-items-center rounded-lg bg-fern text-white">
                   <Bot size={17} />
                 </div>
-                <div className="rounded-lg bg-mist px-4 py-3 text-sm font-semibold text-slate-500">Reading the document...</div>
+                <div className="rounded-lg bg-mist px-4 py-3 text-sm font-semibold text-slate-500">{t('chat.readingDoc')}</div>
               </div>
             )}
             <div ref={scrollRef} />
@@ -95,12 +102,12 @@ export default function ChatPage() {
               <input
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder="Ask about a clause, term, obligation, or risk..."
+                placeholder={t('chat.placeholder')}
                 className="h-12 min-w-0 flex-1 rounded-lg border border-line bg-white px-4 text-sm outline-none transition focus:border-fern focus:ring-4 focus:ring-fern/10"
               />
               <Button type="submit" disabled={loading || !question.trim()} className="px-4">
                 <Send size={17} />
-                <span className="hidden sm:inline">Send</span>
+                <span className="hidden sm:inline">{t('chat.sendBtn')}</span>
               </Button>
             </div>
           </form>
