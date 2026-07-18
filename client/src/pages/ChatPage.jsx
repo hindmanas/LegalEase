@@ -9,22 +9,23 @@ import { useTranslation } from 'react-i18next';
 
 export default function ChatPage() {
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [document, setDocument] = useState(null);
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
+  const [languageSelected, setLanguageSelected] = useState(false);
   const scrollRef = useRef(null);
 
-  // Initialize greeting message using t() after component mounts and t is loaded
+  // Ask for language preference at the start
   useEffect(() => {
     setMessages([
       {
         role: 'assistant',
-        content: t('chat.initialMessage')
+        content: "Hello! Please select your preferred language to continue / कृपया आगे बढ़ने के लिए अपनी पसंदीदा भाषा चुनें / ચાલુ રાખવા માટે કૃપા કરીને તમારી પસંદગીની ભાષા પસંદ કરો"
       }
     ]);
-  }, [t]);
+  }, []);
 
   useEffect(() => {
     api.getDocument(id).then((data) => setDocument(data.document));
@@ -33,6 +34,33 @@ export default function ChatPage() {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  function handleSelectLanguage(code) {
+    localStorage.setItem('language', code);
+    i18n.changeLanguage(code);
+    setLanguageSelected(true);
+
+    const languageNames = { en: 'English', hi: 'Hindi (हिन्दी)', gu: 'Gujarati (ગુજરાતી)' };
+    const acknowledgments = {
+      en: "Great! I will answer your questions about the document in English. What would you like to know?",
+      hi: "बहुत बढ़िया! मैं दस्तावेज़ के बारे में आपके प्रश्नों का उत्तर हिन्दी में दूँगा। आप क्या जानना चाहते हैं?",
+      gu: "સરસ! હું દસ્તાવેજ વિશેના તમારા પ્રશ્નોના જવાબ ગુજરાતીમાં આપીશ. તમે શું જાણવા માંગો છો?"
+    };
+
+    setMessages((current) => [
+      ...current,
+      { role: 'user', content: `Selected Language: ${languageNames[code]}` }
+    ]);
+
+    setLoading(true);
+    setTimeout(() => {
+      setMessages((current) => [
+        ...current,
+        { role: 'assistant', content: acknowledgments[code] }
+      ]);
+      setLoading(false);
+    }, 800);
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -94,6 +122,33 @@ export default function ChatPage() {
                 <div className="rounded-lg bg-mist px-4 py-3 text-sm font-semibold text-slate-500">{t('chat.readingDoc')}</div>
               </div>
             )}
+            {!languageSelected && (
+              <div className="flex flex-col gap-2 pl-12 mt-2">
+                <p className="text-xs text-slate-500 font-semibold mb-1">
+                  Select Language / भाषा चुनें / ભાષા પસંદ કરો:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleSelectLanguage('en')}
+                    className="rounded-lg bg-fern px-4 py-2 text-sm font-bold text-white hover:bg-fern/90 transition shadow-sm"
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => handleSelectLanguage('hi')}
+                    className="rounded-lg bg-fern px-4 py-2 text-sm font-bold text-white hover:bg-fern/90 transition shadow-sm"
+                  >
+                    Hindi (हिन्दी)
+                  </button>
+                  <button
+                    onClick={() => handleSelectLanguage('gu')}
+                    className="rounded-lg bg-fern px-4 py-2 text-sm font-bold text-white hover:bg-fern/90 transition shadow-sm"
+                  >
+                    Gujarati (ગુજરાતી)
+                  </button>
+                </div>
+              </div>
+            )}
             <div ref={scrollRef} />
           </div>
 
@@ -102,10 +157,11 @@ export default function ChatPage() {
               <input
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder={t('chat.placeholder')}
-                className="h-12 min-w-0 flex-1 rounded-lg border border-line bg-white px-4 text-sm outline-none transition focus:border-fern focus:ring-4 focus:ring-fern/10"
+                placeholder={languageSelected ? t('chat.placeholder') : "Please select your preferred language..."}
+                disabled={!languageSelected || loading}
+                className="h-12 min-w-0 flex-1 rounded-lg border border-line bg-white px-4 text-sm outline-none transition focus:border-fern focus:ring-4 focus:ring-fern/10 disabled:opacity-50"
               />
-              <Button type="submit" disabled={loading || !question.trim()} className="px-4">
+              <Button type="submit" disabled={loading || !languageSelected || !question.trim()} className="px-4">
                 <Send size={17} />
                 <span className="hidden sm:inline">{t('chat.sendBtn')}</span>
               </Button>

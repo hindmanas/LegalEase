@@ -4,9 +4,24 @@ import { extractTextFromFile, extractTextFromBuffer } from '../services/parser.s
 import { uploadToSupabase, downloadFromSupabase } from '../services/supabase.service.js';
 import { AppError } from '../utils/AppError.js';
 import fs from 'fs/promises';
+import https from 'https';
 
 function getFileType(filename) {
   return filename.split('.').pop()?.toLowerCase() || 'unknown';
+}
+
+function fetchUrlBuffer(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        return reject(new Error(`Failed to fetch URL, status code: ${res.statusCode}`));
+      }
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', (err) => reject(err));
+    }).on('error', (err) => reject(err));
+  });
 }
 
 export async function uploadDocument(req, res, next) {
@@ -60,15 +75,21 @@ export async function uploadDocument(req, res, next) {
       }
 
       let buffer;
-      if (pdfUrl) {
-        const fetchRes = await fetch(pdfUrl);
-        if (!fetchRes.ok) {
-          throw new AppError('Failed to download document from the provided URL', 400);
+      try {
+        if (supabasePath) {
+          buffer = await downloadFromSupabase(supabasePath, req.headers.authorization);
+        } else if (pdfUrl) {
+          buffer = await fetchUrlBuffer(pdfUrl);
+        } else {
+          throw new AppError('Missing supabasePath or pdfUrl', 400);
         }
-        buffer = Buffer.from(await fetchRes.arrayBuffer());
-      } else {
-        // Download file from Supabase Storage
-        buffer = await downloadFromSupabase(supabasePath, req.headers.authorization);
+      } catch (downloadError) {
+        console.warn('Primary download attempt failed, trying fallback:', downloadError.message);
+        if (pdfUrl) {
+          buffer = await fetchUrlBuffer(pdfUrl);
+        } else {
+          throw downloadError;
+        }
       }
 
       // Parse text directly from buffer
