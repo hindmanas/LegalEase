@@ -48,4 +48,4 @@ English(it would be default)
 Hindi 
 Gujrati
 
-Now we are adding the google gemini_api_key to get the results in more structured way
+We have added gemini flash model to get interaction with the ai chatbot
