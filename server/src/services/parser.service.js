@@ -52,7 +52,7 @@ function runPyMuPDFExtractor(input) {
         py.stderr.on('data', (chunk) => {
           const str = chunk.toString('utf8');
           stderrData += str;
-          
+
           // Print progress to server console
           const lines = str.split('\n');
           for (const line of lines) {
@@ -90,7 +90,7 @@ function runPyMuPDFExtractor(input) {
       attemptSpawn(0);
     } catch (err) {
       if (tempFilePath) {
-        await fs.unlink(tempFilePath).catch(() => {});
+        await fs.unlink(tempFilePath).catch(() => { });
       }
       reject(err);
     }

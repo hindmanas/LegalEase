@@ -49,3 +49,4 @@ Hindi
 Gujrati
 
 We have added gemini flash model to get interaction with the ai chatbot
+but currently it is 

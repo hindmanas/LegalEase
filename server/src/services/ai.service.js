@@ -9,6 +9,78 @@ function extractJson(text) {
   return JSON.parse(match[0]);
 }
 
+let activeGenerativeModelName = null;
+let activeEmbeddingModelName = null;
+
+async function callGeminiGenerateContent(genAI, prompt) {
+  const envModel = process.env.GEMINI_MODEL;
+  const candidates = [
+    ...(activeGenerativeModelName ? [activeGenerativeModelName] : []),
+    ...(envModel ? [envModel] : []),
+    'gemini-2.5-flash'
+  ];
+
+  const uniqueCandidates = [...new Set(candidates)];
+  let lastError = null;
+
+  for (const modelName of uniqueCandidates) {
+    try {
+      const cleanModel = modelName.replace(/^models\//, '');
+      const model = genAI.getGenerativeModel({ model: cleanModel });
+      const response = await model.generateContent(prompt);
+      activeGenerativeModelName = cleanModel;
+      return response;
+    } catch (err) {
+      lastError = err;
+      const errMsg = err.message || '';
+      if (errMsg.includes('404') || errMsg.includes('not found') || errMsg.includes('not supported') || errMsg.includes('ModelService')) {
+        console.warn(`[Gemini AI] Model '${modelName}' returned error, trying next fallback... (${errMsg})`);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError;
+}
+
+async function callGeminiEmbedding(genAI, inputs) {
+  const envModel = process.env.GEMINI_EMBEDDING_MODEL;
+  const candidates = [
+    ...(activeEmbeddingModelName ? [activeEmbeddingModelName] : []),
+    ...(envModel ? [envModel] : []),
+    'text-embedding-004',
+    'embedding-001'
+  ];
+
+  const uniqueCandidates = [...new Set(candidates)];
+  let lastError = null;
+
+  for (const modelName of uniqueCandidates) {
+    try {
+      const cleanModel = modelName.replace(/^models\//, '');
+      const model = genAI.getGenerativeModel({ model: cleanModel });
+      const requests = inputs.map((text) => ({
+        content: { parts: [{ text }] },
+        model: `models/${cleanModel}`
+      }));
+      const result = await model.batchEmbedContents({ requests });
+      activeEmbeddingModelName = cleanModel;
+      return result.embeddings.map((e) => e.values);
+    } catch (err) {
+      lastError = err;
+      const errMsg = err.message || '';
+      if (errMsg.includes('404') || errMsg.includes('not found') || errMsg.includes('not supported') || errMsg.includes('ModelService')) {
+        console.warn(`[Gemini Embedding] Model '${modelName}' returned error, trying next fallback... (${errMsg})`);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError;
+}
+
 function analysisPrompt(text, language = 'English') {
   return `
 You are a legal document simplification assistant. This is not legal advice.
@@ -30,8 +102,7 @@ ${text.slice(0, 18000)}
 export async function analyzeLegalText(text, language = 'English') {
   if (process.env.GEMINI_API_KEY) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-1.5-flash' });
-    const response = await model.generateContent(analysisPrompt(text, language));
+    const response = await callGeminiGenerateContent(genAI, analysisPrompt(text, language));
     return { ...extractJson(response.response.text()), provider: 'gemini', analyzedAt: new Date() };
   }
 
@@ -72,7 +143,6 @@ Question: ${question}
 
   if (process.env.GEMINI_API_KEY) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-1.5-flash' });
 
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -105,7 +175,7 @@ If you decline, do so politely in ${language}. Do not let the user bypass these 
 Document context and excerpts:
 ${context}`;
 
-    const response = await model.generateContent(systemPrompt);
+    const response = await callGeminiGenerateContent(genAI, systemPrompt);
     return response.response.text();
   }
 
@@ -131,14 +201,7 @@ export async function generateEmbedding(textOrTexts) {
 
   if (process.env.GEMINI_API_KEY) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const requests = inputs.map((text) => ({
-      content: { parts: [{ text }] },
-      model: process.env.GEMINI_EMBEDDING_MODEL || "models/text-embedding-004"
-    }));
-    const result = await genAI.getGenerativeModel({ model: process.env.GEMINI_EMBEDDING_MODEL || 'text-embedding-004' }).batchEmbedContents({
-      requests
-    });
-    const embeddings = result.embeddings.map((e) => e.values);
+    const embeddings = await callGeminiEmbedding(genAI, inputs);
     return isArray ? embeddings : embeddings[0];
   }
 
@@ -170,3 +233,4 @@ export async function generateEmbedding(textOrTexts) {
   const embeddings = inputs.map(txt => getMockEmbedding(txt));
   return isArray ? embeddings : embeddings[0];
 }
+

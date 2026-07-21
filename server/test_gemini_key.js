@@ -12,7 +12,7 @@ async function testKey() {
   console.log("Key format check:", key.startsWith("AIzaSy") ? "Valid format (starts with AIzaSy)" : "Warning: Key does not start with AIzaSy");
 
   const genAI = new GoogleGenerativeAI(key);
-  const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro'];
 
   for (const modelName of models) {
     console.log(`\nTesting model: ${modelName}...`);
@@ -27,3 +27,4 @@ async function testKey() {
 }
 
 testKey();
+
