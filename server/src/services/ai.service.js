@@ -17,7 +17,7 @@ async function callGeminiGenerateContent(genAI, prompt) {
   const candidates = [
     ...(activeGenerativeModelName ? [activeGenerativeModelName] : []),
     ...(envModel ? [envModel] : []),
-    'gemini-2.5-flash'
+    'gemini-2.5-flash-lite'
   ];
 
   const uniqueCandidates = [...new Set(candidates)];
