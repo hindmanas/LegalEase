@@ -49,6 +49,4 @@ Hindi
 Gujrati
 
 We have added gemini flash model to get interaction with the ai chatbot
-but currently api is not able to fetch the data properly please have a look after the issue
-
-please dont change the frontend code as it is working fine.
+but currently api is not able to fetch the data from the document.
