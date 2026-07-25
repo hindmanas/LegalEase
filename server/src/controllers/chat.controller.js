@@ -5,7 +5,7 @@ import { AppError } from '../utils/AppError.js';
 
 export async function chatWithDocument(req, res, next) {
   try {
-    const { question } = req.body;
+    const { question, history } = req.body;
 
     if (!question?.trim()) {
       throw new AppError('Question is required', 400);
@@ -23,7 +23,7 @@ export async function chatWithDocument(req, res, next) {
     const languageMap = { en: 'English', hi: 'Hindi', gu: 'Gujarati' };
     const targetLanguage = languageMap[language.split(',')[0].slice(0, 2)] || 'English';
 
-    const answer = await answerDocumentQuestion(document, question.trim(), targetLanguage);
+    const answer = await answerDocumentQuestion(document, question.trim(), targetLanguage, history);
     res.json({ answer });
   } catch (error) {
     next(error);

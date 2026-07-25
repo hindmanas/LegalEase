@@ -154,7 +154,17 @@ export default {
       chatCalloutTitle: "Have questions about this document?",
       chatCalloutDesc: "Use our dedicated conversational assistant to clarify clauses, search key terms, and get answers.",
       chatCalloutBtn: "Chat With AI",
-      analyzingText: "Analyzing..."
+      analyzingText: "Analyzing...",
+      documentTypeLabel: "Document Type",
+      safetyScoreLabel: "Safety Score",
+      riskLevelLabel: "Overall Risk Level",
+      executiveSummaryTitle: "Executive Summary",
+      simplifiedSummaryTitle: "Simplified Summary",
+      recommendationsTitle: "Recommendations",
+      obligationsTitle: "Legal Obligations",
+      responsibilitiesTitle: "User Responsibilities",
+      missingClausesTitle: "Missing & Suspicious Clauses",
+      conclusionTitle: "Final Conclusion"
     },
     chat: {
       backLink: "Back to analysis",
@@ -162,7 +172,8 @@ export default {
       initialMessage: "Ask me about obligations, risks, deadlines, renewal terms, liability, or anything else in this document.",
       readingDoc: "Reading the document...",
       placeholder: "Ask about a clause, term, obligation, or risk...",
-      sendBtn: "Send"
+      sendBtn: "Send",
+      suggestedTitle: "Suggested Questions"
     },
     settings: {
       tag: "Settings",

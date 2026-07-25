@@ -154,7 +154,17 @@ export default {
       chatCalloutTitle: "क्या इस दस्तावेज़ के बारे में आपके कोई प्रश्न हैं?",
       chatCalloutDesc: "क्लॉज को स्पष्ट करने, महत्वपूर्ण शब्दों को खोजने और उत्तर प्राप्त करने के लिए हमारे समर्पित चैटबॉट का उपयोग करें।",
       chatCalloutBtn: "एआई के साथ चैट करें",
-      analyzingText: "विश्लेषण किया जा रहा है..."
+      analyzingText: "विश्लेषण किया जा रहा है...",
+      documentTypeLabel: "दस्तावेज़ का प्रकार",
+      safetyScoreLabel: "सुरक्षा स्कोर",
+      riskLevelLabel: "कुल जोखिम स्तर",
+      executiveSummaryTitle: "कार्यकारी सारांश",
+      simplifiedSummaryTitle: "सरलीकृत सारांश",
+      recommendationsTitle: "सिफारिशें",
+      obligationsTitle: "कानूनी दायित्व",
+      responsibilitiesTitle: "उपयोगकर्ता की जिम्मेदारियां",
+      missingClausesTitle: "लापता और संदिग्ध क्लॉज",
+      conclusionTitle: "अंतिम निष्कर्ष"
     },
     chat: {
       backLink: "विश्लेषण पर वापस जाएं",
@@ -162,7 +172,8 @@ export default {
       initialMessage: "मुझसे दायित्वों, जोखिमों, समय सीमा, नवीनीकरण की शर्तों, देयता, या इस दस्तावेज़ में किसी भी चीज़ के बारे में पूछें।",
       readingDoc: "दस्तावेज़ पढ़ा जा रहा है...",
       placeholder: "किसी क्लॉज, शब्द, दायित्व या जोखिम के बारे में पूछें...",
-      sendBtn: "भेजें"
+      sendBtn: "भेजें",
+      suggestedTitle: "सुझाए गए प्रश्न"
     },
     settings: {
       tag: "सेटिंग्स",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Download, FileText, MessageSquareText, RefreshCw, ShieldAlert, DollarSign, HelpCircle, Info, Sparkles, MessageSquare } from 'lucide-react';
+import { Download, FileText, MessageSquareText, RefreshCw, ShieldAlert, DollarSign, HelpCircle, Info, Sparkles, MessageSquare, Scale, CheckCircle2, User, AlertOctagon, ShieldCheck } from 'lucide-react';
 import { api } from '../lib/api.js';
 import Button from '../components/ui/Button.jsx';
 import Card from '../components/ui/Card.jsx';
@@ -101,21 +101,89 @@ export default function AnalysisPage() {
           </Card>
         ) : (
           <>
-            {/* Row 1: Document Overview & Key Information */}
-            <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-              <Card className="p-6">
-                <h2 className="font-display text-xl font-bold flex items-center gap-2">
-                  <Info size={19} className="text-brandBlue" />
-                  {t('analysis.overviewTitle')}
+            {/* Hero Metrics Row */}
+            <div className="grid gap-5 sm:grid-cols-3">
+              <Card className="p-5 flex items-center gap-4 bg-white border border-slate-100 shadow-sm">
+                <div className="grid size-12 place-items-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
+                  <FileText size={22} />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('analysis.documentTypeLabel', 'Document Type')}</p>
+                  <p className="mt-1 font-display text-lg font-bold text-slate-800 capitalize">
+                    {analysis.documentType || 'Legal Document'}
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="p-5 bg-white border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('analysis.safetyScoreLabel', 'Safety Score')}</p>
+                  <span className={`text-sm font-bold ${
+                    (analysis.safetyScore || 0) >= 80 ? 'text-emerald-600' : (analysis.safetyScore || 0) >= 50 ? 'text-amber-600' : 'text-rose-600'
+                  }`}>
+                    {analysis.safetyScore !== undefined ? `${analysis.safetyScore}/100` : 'N/A'}
+                  </span>
+                </div>
+                <div className="mt-3 w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      (analysis.safetyScore || 0) >= 80 ? 'bg-emerald-500' : (analysis.safetyScore || 0) >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                    }`}
+                    style={{ width: `${analysis.safetyScore !== undefined ? analysis.safetyScore : 50}%` }}
+                  ></div>
+                </div>
+              </Card>
+
+              <Card className="p-5 flex items-center justify-between bg-white border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className={`grid size-12 place-items-center rounded-xl shrink-0 ${
+                    analysis.overallRiskLevel === 'low' ? 'bg-emerald-50 text-emerald-600' : analysis.overallRiskLevel === 'medium' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                  }`}>
+                    <ShieldAlert size={22} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('analysis.riskLevelLabel', 'Overall Risk Level')}</p>
+                    <p className="mt-1 font-display text-lg font-bold text-slate-800 capitalize">
+                      {t(`common.${analysis.overallRiskLevel}`, analysis.overallRiskLevel || 'low')}
+                    </p>
+                  </div>
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
+                  analysis.overallRiskLevel === 'low' ? 'bg-emerald-100 text-emerald-800' : analysis.overallRiskLevel === 'medium' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                }`}>
+                  {analysis.overallRiskLevel || 'low'}
+                </span>
+              </Card>
+            </div>
+
+            {/* Row 2: Executive Summary & Simplified Summary */}
+            <div className="grid gap-5 lg:grid-cols-2">
+              <Card className="p-6 bg-gradient-to-br from-white to-slate-50 border border-slate-100">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <Sparkles size={19} className="text-blue-500" />
+                  {t('analysis.executiveSummaryTitle', 'Executive Summary')}
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-slate-700 whitespace-pre-line">
-                  {analysis.documentOverview || analysis.summary}
+                  {analysis.executiveSummary || analysis.summary || 'No executive summary available.'}
                 </p>
               </Card>
 
+              <Card className="p-6 bg-gradient-to-br from-white to-blue-50/10 border border-slate-100">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <Info size={19} className="text-brandBlue" />
+                  {t('analysis.simplifiedSummaryTitle', 'Simplified Summary')}
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-slate-700 whitespace-pre-line">
+                  {analysis.simplifiedSummary || analysis.simplifiedText || 'No simplified summary available.'}
+                </p>
+              </Card>
+            </div>
+
+            {/* Row 3: Key Information & Recommendations */}
+            <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
               <Card className="p-6">
                 <h2 className="font-display text-xl font-bold flex items-center gap-2">
-                  <Sparkles size={19} className="text-brandBlue" />
+                  <FileText size={19} className="text-brandBlue" />
                   {t('analysis.keyInfoTitle')}
                 </h2>
                 {analysis.keyInformation ? (
@@ -131,9 +199,69 @@ export default function AnalysisPage() {
                   <p className="mt-4 text-sm text-slate-500">{t('analysis.keyInfoEmpty')}</p>
                 )}
               </Card>
+
+              <Card className="p-6">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-emerald-700">
+                  <CheckCircle2 size={19} className="text-emerald-600" />
+                  {t('analysis.recommendationsTitle', 'Recommendations')}
+                </h2>
+                {analysis.recommendations?.length ? (
+                  <ul className="space-y-3 mt-4 text-sm text-slate-700">
+                    {analysis.recommendations.map((recommendation, idx) => (
+                      <li key={idx} className="flex items-start gap-3 bg-emerald-50/30 border border-emerald-100/50 rounded-xl p-3">
+                        <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+                        <span>{recommendation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">{t('analysis.recommendationsEmpty', 'No specific recommendations generated.')}</p>
+                )}
+              </Card>
             </div>
 
-            {/* Row 2: Important Clauses & Risks & Red Flags */}
+            {/* Row 4: Obligations & User Responsibilities */}
+            <div className="grid gap-5 lg:grid-cols-2">
+              <Card className="p-6">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <Scale size={19} className="text-brandBlue" />
+                  {t('analysis.obligationsTitle', 'Legal Obligations')}
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {analysis.legalObligations?.length ? (
+                    analysis.legalObligations.map((item, index) => (
+                      <div key={index} className="rounded-lg border border-slate-100 p-4 bg-slate-50/40">
+                        <h3 className="font-bold text-slate-800 text-sm">{item.title}</h3>
+                        <p className="mt-1.5 text-xs leading-5 text-slate-600">{item.obligation}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">{t('analysis.obligationsEmpty', 'No legal obligations identified.')}</p>
+                  )}
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <User size={19} className="text-brandBlue" />
+                  {t('analysis.responsibilitiesTitle', 'User Responsibilities')}
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {analysis.userResponsibilities?.length ? (
+                    analysis.userResponsibilities.map((item, index) => (
+                      <div key={index} className="rounded-lg border border-slate-100 p-4 bg-slate-50/40">
+                        <h3 className="font-bold text-slate-800 text-sm">{item.title}</h3>
+                        <p className="mt-1.5 text-xs leading-5 text-slate-600">{item.responsibility}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">{t('analysis.responsibilitiesEmpty', 'No specific user responsibilities identified.')}</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Row 5: Important Clauses & Missing/Suspicious Clauses */}
             <div className="grid gap-5 lg:grid-cols-2">
               <Card className="p-6">
                 <h2 className="font-display text-xl font-bold flex items-center gap-2">
@@ -141,81 +269,121 @@ export default function AnalysisPage() {
                   {t('analysis.clausesTitle')}
                 </h2>
                 <div className="mt-4 space-y-3">
-                  {analysis.clauses?.length ? analysis.clauses.map((clause, index) => (
-                    <div key={`${clause.title}-${index}`} className="rounded-lg border border-line p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-bold">{clause.title}</h3>
-                        <span className="rounded-full bg-mist px-2.5 py-1 text-xs font-bold text-slate-600">{clause.category}</span>
+                  {(analysis.importantClauses || analysis.clauses)?.length ? (
+                    (analysis.importantClauses || analysis.clauses).map((clause, index) => (
+                      <div key={`${clause.title}-${index}`} className="rounded-lg border border-line p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-bold text-sm text-slate-800">{clause.title}</h3>
+                          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 shrink-0">{clause.category}</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-slate-600">{clause.explanation}</p>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{clause.explanation}</p>
-                    </div>
-                  )) : (
+                    ))
+                  ) : (
                     <p className="text-sm text-slate-500">{t('analysis.clausesEmpty')}</p>
                   )}
                 </div>
               </Card>
 
-              <Card className="p-6">
-                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-clay">
-                  <ShieldAlert size={19} className="text-clay" />
-                  {t('analysis.risksTitle')}
+              <Card className="p-6 border border-rose-100">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-rose-700">
+                  <AlertOctagon size={19} className="text-rose-600" />
+                  {t('analysis.missingClausesTitle', 'Missing & Suspicious Clauses')}
                 </h2>
                 <div className="mt-4 space-y-3">
-                  {analysis.risks?.length ? analysis.risks.map((risk, index) => (
-                    <div key={`${risk.title}-${index}`} className="rounded-lg border border-clay/20 bg-clay/5 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-bold">{risk.title}</h3>
-                        <RiskBadge level={risk.level} />
+                  {analysis.missingSuspiciousClauses?.length ? (
+                    analysis.missingSuspiciousClauses.map((item, index) => (
+                      <div key={index} className="rounded-lg border border-rose-100 bg-rose-50/10 p-4">
+                        <h3 className="font-bold text-sm text-rose-900">{item.title}</h3>
+                        <p className="mt-2 text-xs leading-5 text-slate-700">{item.explanation}</p>
+                        {item.impact && (
+                          <p className="mt-2 text-xs font-semibold text-rose-700 bg-rose-50/50 p-2 rounded">
+                            Impact: {item.impact}
+                          </p>
+                        )}
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-700">{risk.explanation}</p>
-                      {risk.suggestion && <p className="mt-3 text-sm font-semibold text-clay">{risk.suggestion}</p>}
-                    </div>
-                  )) : (
-                    <p className="text-sm text-slate-600">{t('analysis.risksEmpty')}</p>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">{t('analysis.missingClausesEmpty', 'No standard missing clauses or highly suspicious language flagged.')}</p>
                   )}
                 </div>
               </Card>
             </div>
 
-            {/* Row 3: Hidden Charges */}
-            <Card className="p-6 border border-amber-200 bg-amber-50/5">
-              <h2 className="font-display text-xl font-bold text-amber-700 flex items-center gap-2">
-                <DollarSign size={19} className="text-amber-600" />
-                {t('analysis.chargesTitle')}
+            {/* Row 6: Risks & Hidden Charges */}
+            <div className="grid gap-5 lg:grid-cols-2">
+              <Card className="p-6 border border-clay/20 bg-clay/5">
+                <h2 className="font-display text-xl font-bold flex items-center gap-2 text-clay">
+                  <ShieldAlert size={19} className="text-clay" />
+                  {t('analysis.risksTitle')}
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {(analysis.risksRedFlags || analysis.risks)?.length ? (
+                    (analysis.risksRedFlags || analysis.risks).map((risk, index) => (
+                      <div key={`${risk.title}-${index}`} className="rounded-lg border border-clay/20 bg-clay/5 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-bold text-sm text-slate-800">{risk.title}</h3>
+                          <RiskBadge level={risk.level} />
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-slate-700">{risk.explanation}</p>
+                        {risk.suggestion && <p className="mt-2.5 text-xs font-semibold text-clay">{risk.suggestion}</p>}
+                        {risk.excerpt && (
+                          <p className="mt-2 text-2xs italic text-slate-500 bg-white/40 p-2 rounded border border-slate-100">
+                            "{risk.excerpt}"
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-600">{t('analysis.risksEmpty')}</p>
+                  )}
+                </div>
+              </Card>
+
+              <Card className="p-6 border border-amber-200 bg-amber-50/5">
+                <h2 className="font-display text-xl font-bold text-amber-700 flex items-center gap-2">
+                  <DollarSign size={19} className="text-amber-600" />
+                  {t('analysis.chargesTitle')}
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {(analysis.hiddenChargesPenalties || analysis.hiddenCharges)?.length ? (
+                    (analysis.hiddenChargesPenalties || analysis.hiddenCharges).map((charge, index) => (
+                      <div key={`${charge.title}-${index}`} className="rounded-lg border border-amber-200 bg-amber-50/30 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-bold text-sm text-amber-900">{charge.title}</h3>
+                          {charge.amount && (
+                            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-2xs font-bold text-amber-800 shrink-0">
+                              {charge.amount}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-slate-700">{charge.explanation}</p>
+                        {charge.excerpt && (
+                          <p className="mt-2 text-2xs italic text-slate-500 bg-white/60 p-2 rounded border border-amber-100">
+                            "{charge.excerpt}"
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-600">{t('analysis.chargesEmpty')}</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Conclusion Section */}
+            <Card className="p-6 bg-slate-900 text-slate-100 border border-slate-800">
+              <h2 className="font-display text-xl font-bold flex items-center gap-2 text-white">
+                <ShieldCheck size={20} className="text-emerald-400" />
+                {t('analysis.conclusionTitle', 'Final Conclusion')}
               </h2>
-              <div className="mt-4 space-y-3">
-                {analysis.hiddenCharges?.length ? analysis.hiddenCharges.map((charge, index) => (
-                  <div key={`${charge.title}-${index}`} className="rounded-lg border border-amber-200 bg-amber-50/30 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-bold text-amber-900">{charge.title}</h3>
-                      {charge.amount && (
-                        <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
-                          {charge.amount}
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-700">{charge.explanation}</p>
-                    {charge.excerpt && (
-                      <p className="mt-2 text-xs italic text-slate-500 bg-white/60 p-2 rounded border border-amber-100">
-                        "{charge.excerpt}"
-                      </p>
-                    )}
-                  </div>
-                )) : (
-                  <p className="text-sm text-slate-600">{t('analysis.chargesEmpty')}</p>
-                )}
-              </div>
+              <p className="mt-4 text-sm leading-7 text-slate-300 whitespace-pre-wrap">
+                {analysis.finalConclusion || 'No final conclusion available.'}
+              </p>
             </Card>
 
-            {/* Row 4: Plain English Summary */}
-            <Card className="p-6">
-              <h2 className="font-display text-xl font-bold">{t('analysis.summaryTitle')}</h2>
-              <div className="mt-4 rounded-lg bg-mist p-5 text-sm leading-7 text-slate-700 whitespace-pre-wrap">
-                {analysis.simplifiedText}
-              </div>
-            </Card>
-
-            {/* Row 5: Chat with AI Callout */}
+            {/* Row 7: Chat with AI Callout */}
             <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex gap-3">
                 <div className="grid size-12 place-items-center rounded-lg bg-white shadow-sm border border-blue-100 text-brandBlue shrink-0">

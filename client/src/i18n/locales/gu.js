@@ -154,7 +154,17 @@ export default {
       chatCalloutTitle: "આ દસ્તાવેજ વિશે કોઈ પ્રશ્નો છે?",
       chatCalloutDesc: "કલમો સ્પષ્ટ કરવા, મહત્વપૂર્ણ શબ્દો શોધવા અને જવાબો મેળવવા માટે અમારા સમર્પિત ચેટબોટનો ઉપયોગ કરો.",
       chatCalloutBtn: "એઆઈ સાથે ચેટ કરો",
-      analyzingText: "વિશ્લેષણ થઈ રહ્યું છે..."
+      analyzingText: "વિશ્લેષણ થઈ રહ્યું છે...",
+      documentTypeLabel: "દસ્તાવેજ પ્રકાર",
+      safetyScoreLabel: "સુરક્ષા સ્કોર",
+      riskLevelLabel: "એકંદર જોખમ સ્તર",
+      executiveSummaryTitle: "કાર્યકારી સારાંશ",
+      simplifiedSummaryTitle: "સરળ સારાંશ",
+      recommendationsTitle: "ભલામણો",
+      obligationsTitle: "કાનૂની જવાબદારીઓ",
+      responsibilitiesTitle: "વપરાશકર્તાની જવાબદારીઓ",
+      missingClausesTitle: "ખૂટતી અને શંકાસ્પદ કલમો",
+      conclusionTitle: "અંતિમ નિષ્કર્ષ"
     },
     chat: {
       backLink: "વિશ્લેષણ પર પાછા જાઓ",
@@ -162,7 +172,8 @@ export default {
       initialMessage: "મને જવાબદારીઓ, જોખમો, સમયમર્યાદા, નવીકરણની શરતો, દેયતા અથવા આ દસ્તાવેજમાંની કોઈપણ બાબત વિશે પૂછો.",
       readingDoc: "દસ્તાવેજ વંચાઈ રહ્યો છે...",
       placeholder: "કોઈ કલમ, શબ્દ, જવાબદારી અથવા જોખમ વિશે પૂછો...",
-      sendBtn: "મોકલો"
+      sendBtn: "મોકલો",
+      suggestedTitle: "સૂચવેલા પ્રશ્નો"
     },
     settings: {
       tag: "સેટિંગ્સ",

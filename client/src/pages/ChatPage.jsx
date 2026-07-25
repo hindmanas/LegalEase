@@ -62,23 +62,31 @@ export default function ChatPage() {
     }, 800);
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    if (!question.trim()) return;
-
-    const nextQuestion = question.trim();
-    setMessages((current) => [...current, { role: 'user', content: nextQuestion }]);
-    setQuestion('');
+  async function askQuestion(qText) {
+    if (loading || !qText.trim()) return;
+    
+    // Add user's question to state
+    setMessages((current) => [...current, { role: 'user', content: qText }]);
     setLoading(true);
-
+    
     try {
-      const data = await api.chat(id, nextQuestion);
+      const updatedMessages = [...messages, { role: 'user', content: qText }];
+      const data = await api.chat(id, qText, updatedMessages);
       setMessages((current) => [...current, { role: 'assistant', content: data.answer }]);
     } catch (err) {
       setMessages((current) => [...current, { role: 'assistant', content: err.message }]);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!question.trim()) return;
+
+    const nextQuestion = question.trim();
+    setQuestion('');
+    await askQuestion(nextQuestion);
   }
 
   return (
@@ -149,6 +157,27 @@ export default function ChatPage() {
                 </div>
               </div>
             )}
+            
+            {languageSelected && messages.length <= 2 && document?.analysis?.suggestedQuestions?.length > 0 && (
+              <div className="flex flex-col gap-2.5 pl-12 mt-4 animate-fade-up">
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                  {t('chat.suggestedTitle', 'Suggested Questions')}
+                </p>
+                <div className="flex flex-col gap-2 max-w-xl">
+                  {document.analysis.suggestedQuestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => askQuestion(q)}
+                      className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-700 hover:text-ink hover:border-slate-300 transition shadow-sm text-left w-full leading-5 flex items-center gap-2"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-fern shrink-0"></span>
+                      <span>{q}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             <div ref={scrollRef} />
           </div>
 

@@ -30,15 +30,57 @@ const hiddenChargeSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const obligationSchema = new mongoose.Schema(
+  {
+    title: String,
+    obligation: String
+  },
+  { _id: false }
+);
+
+const responsibilitySchema = new mongoose.Schema(
+  {
+    title: String,
+    responsibility: String
+  },
+  { _id: false }
+);
+
+const missingClauseSchema = new mongoose.Schema(
+  {
+    title: String,
+    explanation: String,
+    impact: String
+  },
+  { _id: false }
+);
+
 const analysisSchema = new mongoose.Schema(
   {
+    documentType: String,
+    executiveSummary: String,
+    simplifiedSummary: String,
+    keyInformation: String,
+    importantClauses: [clauseSchema],
+    risksRedFlags: [riskSchema],
+    hiddenChargesPenalties: [hiddenChargeSchema],
+    legalObligations: [obligationSchema],
+    userResponsibilities: [responsibilitySchema],
+    missingSuspiciousClauses: [missingClauseSchema],
+    recommendations: [String],
+    safetyScore: Number,
+    overallRiskLevel: { type: String, enum: ['low', 'medium', 'high'], default: 'low' },
+    finalConclusion: String,
+    suggestedQuestions: [String],
+    
+    // Legacy fields for backward compatibility
     summary: String,
     simplifiedText: String,
     documentOverview: String,
-    keyInformation: String,
     clauses: [clauseSchema],
     risks: [riskSchema],
     hiddenCharges: [hiddenChargeSchema],
+    
     provider: String,
     analyzedAt: Date
   },

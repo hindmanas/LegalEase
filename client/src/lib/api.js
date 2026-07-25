@@ -51,5 +51,5 @@ export const api = {
     const token = await getAuthToken();
     return `${API_URL}/analysis/${id}/report?token=${token || ''}`;
   },
-  chat: (id, question) => request(`/chat/${id}`, { method: 'POST', body: JSON.stringify({ question }) })
+  chat: (id, question, history) => request(`/chat/${id}`, { method: 'POST', body: JSON.stringify({ question, history }) })
 };
