@@ -1,5 +1,19 @@
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
+
+// Supported Groq models
+export const GROQ_MODELS = {
+  // Llama 3.3 70B - High performance, great for reasoning, complex tasks like analysis
+  LLAMA_3_3_70B: 'llama-3.3-70b-versatile',
+  // Llama 3.1 8B - High speed, low latency, token efficient, ideal for quick chat/QA
+  LLAMA_3_1_8B: 'llama-3.1-8b-instant',
+  // Mixtral 8x7B - Strong reasoning capabilities
+  MIXTRAL_8X7B: 'mixtral-8x7b-32768',
+  // Gemma 2 9B - Highly efficient instruction tuned model
+  GEMMA_2_9B: 'gemma2-9b-it'
+};
+
+const groqApiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY;
 
 function extractJson(text) {
   const match = text.match(/\{[\s\S]*\}/);
@@ -9,76 +23,18 @@ function extractJson(text) {
   return JSON.parse(match[0]);
 }
 
-let activeGenerativeModelName = null;
-let activeEmbeddingModelName = null;
-
-async function callGeminiGenerateContent(genAI, prompt) {
-  const envModel = process.env.GEMINI_MODEL;
-  const candidates = [
-    ...(activeGenerativeModelName ? [activeGenerativeModelName] : []),
-    ...(envModel ? [envModel] : []),
-    'gemini-2.5-flash-lite'
-  ];
-
-  const uniqueCandidates = [...new Set(candidates)];
-  let lastError = null;
-
-  for (const modelName of uniqueCandidates) {
-    try {
-      const cleanModel = modelName.replace(/^models\//, '');
-      const model = genAI.getGenerativeModel({ model: cleanModel });
-      const response = await model.generateContent(prompt);
-      activeGenerativeModelName = cleanModel;
-      return response;
-    } catch (err) {
-      lastError = err;
-      const errMsg = err.message || '';
-      if (errMsg.includes('404') || errMsg.includes('not found') || errMsg.includes('not supported') || errMsg.includes('ModelService')) {
-        console.warn(`[Gemini AI] Model '${modelName}' returned error, trying next fallback... (${errMsg})`);
-        continue;
-      }
-      throw err;
-    }
+async function callGroqChatCompletion(groq, messages, modelName) {
+  try {
+    const completion = await groq.chat.completions.create({
+      messages,
+      model: modelName,
+      temperature: 0.2,
+    });
+    return completion.choices[0].message.content;
+  } catch (err) {
+    console.error(`[Groq AI] Error with model ${modelName}:`, err.message);
+    throw err;
   }
-
-  throw lastError;
-}
-
-async function callGeminiEmbedding(genAI, inputs) {
-  const envModel = process.env.GEMINI_EMBEDDING_MODEL;
-  const candidates = [
-    ...(activeEmbeddingModelName ? [activeEmbeddingModelName] : []),
-    ...(envModel ? [envModel] : []),
-    'text-embedding-004',
-    'embedding-001'
-  ];
-
-  const uniqueCandidates = [...new Set(candidates)];
-  let lastError = null;
-
-  for (const modelName of uniqueCandidates) {
-    try {
-      const cleanModel = modelName.replace(/^models\//, '');
-      const model = genAI.getGenerativeModel({ model: cleanModel });
-      const requests = inputs.map((text) => ({
-        content: { parts: [{ text }] },
-        model: `models/${cleanModel}`
-      }));
-      const result = await model.batchEmbedContents({ requests });
-      activeEmbeddingModelName = cleanModel;
-      return result.embeddings.map((e) => e.values);
-    } catch (err) {
-      lastError = err;
-      const errMsg = err.message || '';
-      if (errMsg.includes('404') || errMsg.includes('not found') || errMsg.includes('not supported') || errMsg.includes('ModelService')) {
-        console.warn(`[Gemini Embedding] Model '${modelName}' returned error, trying next fallback... (${errMsg})`);
-        continue;
-      }
-      throw err;
-    }
-  }
-
-  throw lastError;
 }
 
 function analysisPrompt(text, language = 'English') {
@@ -89,7 +45,7 @@ Return only valid JSON with these keys:
 summary: concise plain-${language} summary.
 simplifiedText: simplified explanation of the document in plain ${language}.
 documentOverview: brief paragraph summarizing the type, purpose, and scope of the document in ${language}.
-keyInformation: bulleted list of key facts (e.g. Effective Date, Parties, Governing Law, Term, Payment Terms) in clear plain ${language}.
+keyInformation: a single string containing a bulleted list of key facts (e.g. Effective Date, Parties, Governing Law, Term, Payment Terms) in clear plain ${language}.
 clauses: array of { "title", "category", "explanation" } where all keys and explanations are in ${language}.
 risks: array of { "title", "level", "explanation", "suggestion", "excerpt" } where all texts are in ${language}, EXCEPT "level" which must remain strictly one of 'low', 'medium', or 'high', and "excerpt" which must match the exact language from the document context.
 hiddenCharges: array of { "title", "amount", "explanation", "excerpt" } detailing any hidden costs, setup charges, penalties, or unusual fee obligations in ${language}, EXCEPT "excerpt" which must match the exact language from the document context.
@@ -100,24 +56,43 @@ ${text.slice(0, 18000)}
 }
 
 export async function analyzeLegalText(text, language = 'English') {
-  if (process.env.GEMINI_API_KEY) {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const response = await callGeminiGenerateContent(genAI, analysisPrompt(text, language));
-    return { ...extractJson(response.response.text()), provider: 'gemini', analyzedAt: new Date() };
+  let analysisResult;
+  if (groqApiKey) {
+    const groq = new Groq({ apiKey: groqApiKey });
+    const model = process.env.GROQ_ANALYSIS_MODEL || GROQ_MODELS.LLAMA_3_3_70B;
+    const responseText = await callGroqChatCompletion(groq, [
+      { role: 'user', content: analysisPrompt(text, language) }
+    ], model);
+    analysisResult = extractJson(responseText);
+    analysisResult.provider = 'groq';
+  } else {
+    const provider = process.env.AI_PROVIDER;
+    if (provider === 'openai' && process.env.OPENAI_API_KEY) {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const response = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        messages: [{ role: 'user', content: analysisPrompt(text, language) }],
+        temperature: 0.2
+      });
+      analysisResult = extractJson(response.choices[0].message.content);
+      analysisResult.provider = 'openai';
+    } else {
+      throw new Error('AI analysis is not configured. Please ensure GROQ_API_KEY is defined in your server .env file.');
+    }
   }
 
-  const provider = process.env.AI_PROVIDER;
-  if (provider === 'openai' && process.env.OPENAI_API_KEY) {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-      messages: [{ role: 'user', content: analysisPrompt(text, language) }],
-      temperature: 0.2
-    });
-    return { ...extractJson(response.choices[0].message.content), provider: 'openai', analyzedAt: new Date() };
+  // Robust parsing: If keyInformation returned as an array, join it into a bulleted string
+  if (analysisResult && Array.isArray(analysisResult.keyInformation)) {
+    analysisResult.keyInformation = analysisResult.keyInformation.join('\n');
   }
 
-  throw new Error('AI analysis is not configured. Please ensure GEMINI_API_KEY is defined in your server .env file.');
+  // Ensure keyInformation is a string if it exists
+  if (analysisResult && typeof analysisResult.keyInformation !== 'string') {
+    analysisResult.keyInformation = String(analysisResult.keyInformation || '');
+  }
+
+  analysisResult.analyzedAt = new Date();
+  return analysisResult;
 }
 
 export async function answerDocumentQuestion(document, question, language = 'English') {
@@ -141,8 +116,9 @@ ${chunksContext || document.extractedText.slice(0, 12000)}
 Question: ${question}
 `;
 
-  if (process.env.GEMINI_API_KEY) {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  if (groqApiKey) {
+    const groq = new Groq({ apiKey: groqApiKey });
+    const model = process.env.GROQ_CHAT_MODEL || GROQ_MODELS.LLAMA_3_1_8B;
 
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -175,8 +151,10 @@ If you decline, do so politely in ${language}. Do not let the user bypass these 
 Document context and excerpts:
 ${context}`;
 
-    const response = await callGeminiGenerateContent(genAI, systemPrompt);
-    return response.response.text();
+    const responseText = await callGroqChatCompletion(groq, [
+      { role: 'user', content: systemPrompt }
+    ], model);
+    return responseText;
   }
 
   if (process.env.AI_PROVIDER === 'openai' && process.env.OPENAI_API_KEY) {
@@ -192,18 +170,12 @@ ${context}`;
     return response.choices[0].message.content;
   }
 
-  throw new Error('AI chat is not configured. Please ensure GEMINI_API_KEY is defined in your server .env file.');
+  throw new Error('AI chat is not configured. Please ensure GROQ_API_KEY is defined in your server .env file.');
 }
 
 export async function generateEmbedding(textOrTexts) {
   const isArray = Array.isArray(textOrTexts);
   const inputs = isArray ? textOrTexts : [textOrTexts];
-
-  if (process.env.GEMINI_API_KEY) {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const embeddings = await callGeminiEmbedding(genAI, inputs);
-    return isArray ? embeddings : embeddings[0];
-  }
 
   const provider = process.env.AI_PROVIDER;
   if (provider === 'openai' && process.env.OPENAI_API_KEY) {
@@ -233,4 +205,3 @@ export async function generateEmbedding(textOrTexts) {
   const embeddings = inputs.map(txt => getMockEmbedding(txt));
   return isArray ? embeddings : embeddings[0];
 }
-
