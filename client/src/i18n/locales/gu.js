@@ -113,7 +113,14 @@ export default {
       colRisks: "જોખમો",
       colUpdated: "અદ્યતન",
       actionOpen: "ખોલો",
-      actionChat: "ચેટ કરો"
+      actionChat: "ચેટ કરો",
+      quotaTitle: "વપરાશ ક્વોટા",
+      quotaDocsRemaining: "બાકી રહેલા દસ્તાવેજો",
+      quotaNextAnalysis: "આગામી વિશ્લેષણ ઉપલબ્ધ છે",
+      quotaQuestionsRemaining: "વર્તમાન દસ્તાવેજ માટે બાકી રહેલા પ્રશ્નો",
+      quotaWeeklyReset: "સાપ્તાહિક રીસેટ તારીખ",
+      quotaAvailableNow: "હવે ઉપલબ્ધ છે",
+      quotaWaiting: "સાપ્તાહિક રીસેટ માટે રાહ જોઈ રહ્યા છીએ"
     },
     upload: {
       tag: "અપલોડ",
@@ -173,7 +180,8 @@ export default {
       readingDoc: "દસ્તાવેજ વંચાઈ રહ્યો છે...",
       placeholder: "કોઈ કલમ, શબ્દ, જવાબદારી અથવા જોખમ વિશે પૂછો...",
       sendBtn: "મોકલો",
-      suggestedTitle: "સૂચવેલા પ્રશ્નો"
+      suggestedTitle: "સૂચવેલા પ્રશ્નો",
+      limitReached: "તમે આ દસ્તાવેજ માટે એઆઈ પ્રશ્નોની મહત્તમ મર્યાદા વટાવી લીધી છે."
     },
     settings: {
       tag: "સેટિંગ્સ",

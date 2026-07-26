@@ -23,6 +23,16 @@ export async function analyzeDocument(req, res, next) {
     document.status = 'analyzed';
     await document.save();
 
+    // Increment and save user's quota
+    const user = req.user;
+    const now = new Date();
+    if (!user.quotaCycleStart) {
+      user.quotaCycleStart = now;
+    }
+    user.quotaLastAnalyzedAt = now;
+    user.quotaAnalyzedCount = (user.quotaAnalyzedCount || 0) + 1;
+    await user.save();
+
     res.json({ document });
   } catch (error) {
     next(error);

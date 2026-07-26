@@ -115,3 +115,17 @@ export async function createChunk(data) {
 export async function listChunksByDocument(documentId) {
   return chunks.filter((item) => item.document === documentId.toString());
 }
+
+export async function deleteDocumentForUser(documentId, userId) {
+  const docIndex = documents.findIndex((item) => item._id === documentId && item.user === userId.toString());
+  if (docIndex >= 0) {
+    documents.splice(docIndex, 1);
+    for (let i = chunks.length - 1; i >= 0; i--) {
+      if (chunks[i].document === documentId) {
+        chunks.splice(i, 1);
+      }
+    }
+    return true;
+  }
+  return false;
+}

@@ -113,7 +113,14 @@ export default {
       colRisks: "जोखिम",
       colUpdated: "अद्यतित",
       actionOpen: "खोलें",
-      actionChat: "चैट करें"
+      actionChat: "चैट करें",
+      quotaTitle: "उपयोग कोटा",
+      quotaDocsRemaining: "दस्तावेज़ शेष",
+      quotaNextAnalysis: "अगला विश्लेषण उपलब्ध है",
+      quotaQuestionsRemaining: "वर्तमान दस्तावेज़ के लिए प्रश्न शेष",
+      quotaWeeklyReset: "साप्ताहिक रीसेट तिथि",
+      quotaAvailableNow: "अब उपलब्ध है",
+      quotaWaiting: "साप्ताहिक रीसेट की प्रतीक्षा है"
     },
     upload: {
       tag: "अपलोड",
@@ -173,7 +180,8 @@ export default {
       readingDoc: "दस्तावेज़ पढ़ा जा रहा है...",
       placeholder: "किसी क्लॉज, शब्द, दायित्व या जोखिम के बारे में पूछें...",
       sendBtn: "भेजें",
-      suggestedTitle: "सुझाए गए प्रश्न"
+      suggestedTitle: "सुझाए गए प्रश्न",
+      limitReached: "आपने इस दस्तावेज़ के लिए एआई प्रश्नों की अधिकतम संख्या पूरी कर ली है।"
     },
     settings: {
       tag: "सेटिंग्स",

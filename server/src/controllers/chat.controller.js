@@ -19,12 +19,21 @@ export async function chatWithDocument(req, res, next) {
       throw new AppError('Document not found', 404);
     }
 
+    const currentCount = document.questionCount || 0;
+    if (currentCount >= 3) {
+      throw new AppError('You have reached the maximum number of AI questions for this document.', 403);
+    }
+
     const language = req.headers['x-user-language'] || req.headers['accept-language'] || req.user?.language || 'en';
     const languageMap = { en: 'English', hi: 'Hindi', gu: 'Gujarati' };
     const targetLanguage = languageMap[language.split(',')[0].slice(0, 2)] || 'English';
 
     const answer = await answerDocumentQuestion(document, question.trim(), targetLanguage, history);
-    res.json({ answer });
+    
+    document.questionCount = currentCount + 1;
+    await document.save();
+
+    res.json({ answer, questionCount: document.questionCount });
   } catch (error) {
     next(error);
   }

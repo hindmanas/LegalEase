@@ -113,7 +113,14 @@ export default {
       colRisks: "Risks",
       colUpdated: "Updated",
       actionOpen: "Open",
-      actionChat: "Chat"
+      actionChat: "Chat",
+      quotaTitle: "Usage Quota",
+      quotaDocsRemaining: "Documents Remaining",
+      quotaNextAnalysis: "Next Analysis Available In",
+      quotaQuestionsRemaining: "Questions Remaining for Current Document",
+      quotaWeeklyReset: "Weekly Reset Date",
+      quotaAvailableNow: "Available Now",
+      quotaWaiting: "Waiting for weekly reset"
     },
     upload: {
       tag: "Upload",
@@ -173,7 +180,8 @@ export default {
       readingDoc: "Reading the document...",
       placeholder: "Ask about a clause, term, obligation, or risk...",
       sendBtn: "Send",
-      suggestedTitle: "Suggested Questions"
+      suggestedTitle: "Suggested Questions",
+      limitReached: "You have reached the maximum number of AI questions for this document."
     },
     settings: {
       tag: "Settings",

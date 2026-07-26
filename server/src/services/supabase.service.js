@@ -185,3 +185,33 @@ export async function initializeSupabaseBucket() {
   }
 }
 
+/**
+ * Deletes a file from Supabase Storage.
+ * @param {string} storagePath The path of the file inside the bucket
+ * @param {string} [authHeader] Authorization header (JWT) of the user
+ */
+export async function deleteFromSupabase(storagePath, authHeader = null) {
+  const supabaseUrl = (process.env.SUPABASE_URL || '').replace(/['"]/g, '').trim();
+  const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').replace(/['"]/g, '').trim();
+  const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/['"]/g, '').trim();
+
+  if (!supabaseUrl || (!supabaseAnonKey && !supabaseServiceKey)) {
+    console.warn('Supabase credentials not set. Skipping Supabase delete.');
+    return;
+  }
+
+  try {
+    const supabase = getSupabaseClient(authHeader);
+    const { error } = await supabase.storage
+      .from('documents')
+      .remove([storagePath]);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to delete file from Supabase Storage:', error);
+    // Do not rethrow to allow DB cleanup to succeed even if storage delete fails
+  }
+}
+

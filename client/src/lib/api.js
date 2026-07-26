@@ -51,5 +51,7 @@ export const api = {
     const token = await getAuthToken();
     return `${API_URL}/analysis/${id}/report?token=${token || ''}`;
   },
-  chat: (id, question, history) => request(`/chat/${id}`, { method: 'POST', body: JSON.stringify({ question, history }) })
+  chat: (id, question, history) => request(`/chat/${id}`, { method: 'POST', body: JSON.stringify({ question, history }) }),
+  getQuota: () => request('/auth/quota'),
+  deleteDocument: (id) => request(`/documents/${id}`, { method: 'DELETE' })
 };

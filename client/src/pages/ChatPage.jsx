@@ -73,6 +73,11 @@ export default function ChatPage() {
       const updatedMessages = [...messages, { role: 'user', content: qText }];
       const data = await api.chat(id, qText, updatedMessages);
       setMessages((current) => [...current, { role: 'assistant', content: data.answer }]);
+      if (data.questionCount !== undefined) {
+        setDocument((prev) => prev ? { ...prev, questionCount: data.questionCount } : prev);
+      } else {
+        setDocument((prev) => prev ? { ...prev, questionCount: (prev.questionCount || 0) + 1 } : prev);
+      }
     } catch (err) {
       setMessages((current) => [...current, { role: 'assistant', content: err.message }]);
     } finally {
@@ -88,6 +93,8 @@ export default function ChatPage() {
     setQuestion('');
     await askQuestion(nextQuestion);
   }
+
+  const isLimitReached = document && (document.questionCount || 0) >= 3;
 
   return (
     <PageTransition>
@@ -158,7 +165,7 @@ export default function ChatPage() {
               </div>
             )}
             
-            {languageSelected && messages.length <= 2 && document?.analysis?.suggestedQuestions?.length > 0 && (
+            {languageSelected && messages.length <= 2 && document?.analysis?.suggestedQuestions?.length > 0 && !isLimitReached && (
               <div className="flex flex-col gap-2.5 pl-12 mt-4 animate-fade-up">
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
                   {t('chat.suggestedTitle', 'Suggested Questions')}
@@ -181,16 +188,22 @@ export default function ChatPage() {
             <div ref={scrollRef} />
           </div>
 
+          {isLimitReached && (
+            <div className="mx-4 my-2 p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-800 text-sm font-semibold flex items-center justify-center text-center">
+              {t('chat.limitReached', 'You have reached the maximum number of AI questions for this document.')}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="border-t border-line bg-white p-3 sm:p-4">
             <div className="flex gap-2">
               <input
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder={languageSelected ? t('chat.placeholder') : "Please select your preferred language..."}
-                disabled={!languageSelected || loading}
+                placeholder={isLimitReached ? t('chat.limitReached') : languageSelected ? t('chat.placeholder') : "Please select your preferred language..."}
+                disabled={!languageSelected || loading || isLimitReached}
                 className="h-12 min-w-0 flex-1 rounded-lg border border-line bg-white px-4 text-sm outline-none transition focus:border-fern focus:ring-4 focus:ring-fern/10 disabled:opacity-50"
               />
-              <Button type="submit" disabled={loading || !languageSelected || !question.trim()} className="px-4">
+              <Button type="submit" disabled={loading || !languageSelected || !question.trim() || isLimitReached} className="px-4">
                 <Send size={17} />
                 <span className="hidden sm:inline">{t('chat.sendBtn')}</span>
               </Button>

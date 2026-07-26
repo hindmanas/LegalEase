@@ -98,7 +98,8 @@ const documentSchema = new mongoose.Schema(
     size: { type: Number, required: true },
     extractedText: { type: String, default: '' },
     status: { type: String, enum: ['uploaded', 'parsed', 'analyzed', 'failed'], default: 'uploaded' },
-    analysis: analysisSchema
+    analysis: analysisSchema,
+    questionCount: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

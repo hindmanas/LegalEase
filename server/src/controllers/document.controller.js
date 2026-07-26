@@ -1,7 +1,8 @@
 import Document from '../models/Document.js';
-import { createDocument, findDocumentByIdForUser, isMemoryStore, listDocumentsByUser } from '../repositories/memoryStore.js';
+import Chunk from '../models/Chunk.js';
+import { createDocument, findDocumentByIdForUser, isMemoryStore, listDocumentsByUser, deleteDocumentForUser } from '../repositories/memoryStore.js';
 import { extractTextFromFile, extractTextFromBuffer } from '../services/parser.service.js';
-import { uploadToSupabase, downloadFromSupabase } from '../services/supabase.service.js';
+import { uploadToSupabase, downloadFromSupabase, deleteFromSupabase } from '../services/supabase.service.js';
 import { AppError } from '../utils/AppError.js';
 import fs from 'fs/promises';
 import https from 'https';
@@ -149,6 +150,47 @@ export async function getDocument(req, res, next) {
       throw new AppError('Document not found', 404);
     }
     res.json({ document });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteDocument(req, res, next) {
+  try {
+    const documentId = req.params.id;
+    const userId = req.user._id;
+
+    const document = isMemoryStore()
+      ? await findDocumentByIdForUser(documentId, userId)
+      : await Document.findOne({ _id: documentId, user: userId });
+
+    if (!document) {
+      throw new AppError('Document not found', 404);
+    }
+
+    // 1. Delete from Supabase Storage
+    if (document.filePath) {
+      const isUrl = document.filePath.startsWith('http://') || document.filePath.startsWith('https://');
+      if (!isUrl) {
+        await deleteFromSupabase(document.filePath, req.headers.authorization);
+      } else if (document.filePath.includes('/storage/v1/object/')) {
+        const parts = document.filePath.split('/documents/');
+        if (parts.length > 1) {
+          const relativePath = parts[1].split('?')[0];
+          await deleteFromSupabase(decodeURIComponent(relativePath), req.headers.authorization);
+        }
+      }
+    }
+
+    // 2. Delete from Database and Vector chunks
+    if (isMemoryStore()) {
+      await deleteDocumentForUser(documentId, userId);
+    } else {
+      await Document.deleteOne({ _id: documentId, user: userId });
+      await Chunk.deleteMany({ document: documentId });
+    }
+
+    res.json({ success: true, message: 'Document deleted successfully' });
   } catch (error) {
     next(error);
   }
