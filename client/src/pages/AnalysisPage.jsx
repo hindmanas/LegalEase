@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Download, FileText, MessageSquareText, RefreshCw, ShieldAlert, DollarSign, HelpCircle, Info, Sparkles, MessageSquare, Scale, CheckCircle2, User, AlertOctagon, ShieldCheck } from 'lucide-react';
+import { Download, FileText, MessageSquareText, RefreshCw, ShieldAlert, IndianRupee, HelpCircle, Info, Sparkles, MessageSquare, Scale, CheckCircle2, User, AlertOctagon, ShieldCheck, BookOpen } from 'lucide-react';
 import { api } from '../lib/api.js';
 import Button from '../components/ui/Button.jsx';
 import Card from '../components/ui/Card.jsx';
@@ -118,17 +118,15 @@ export default function AnalysisPage() {
               <Card className="p-5 bg-white border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('analysis.safetyScoreLabel', 'Safety Score')}</p>
-                  <span className={`text-sm font-bold ${
-                    (analysis.safetyScore || 0) >= 80 ? 'text-emerald-600' : (analysis.safetyScore || 0) >= 50 ? 'text-amber-600' : 'text-rose-600'
-                  }`}>
+                  <span className={`text-sm font-bold ${(analysis.safetyScore || 0) >= 80 ? 'text-emerald-600' : (analysis.safetyScore || 0) >= 50 ? 'text-amber-600' : 'text-rose-600'
+                    }`}>
                     {analysis.safetyScore !== undefined ? `${analysis.safetyScore}/100` : 'N/A'}
                   </span>
                 </div>
                 <div className="mt-3 w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      (analysis.safetyScore || 0) >= 80 ? 'bg-emerald-500' : (analysis.safetyScore || 0) >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                    }`}
+                    className={`h-full rounded-full transition-all duration-500 ${(analysis.safetyScore || 0) >= 80 ? 'bg-emerald-500' : (analysis.safetyScore || 0) >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                      }`}
                     style={{ width: `${analysis.safetyScore !== undefined ? analysis.safetyScore : 50}%` }}
                   ></div>
                 </div>
@@ -136,9 +134,8 @@ export default function AnalysisPage() {
 
               <Card className="p-5 flex items-center justify-between bg-white border border-slate-100 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className={`grid size-12 place-items-center rounded-xl shrink-0 ${
-                    analysis.overallRiskLevel === 'low' ? 'bg-emerald-50 text-emerald-600' : analysis.overallRiskLevel === 'medium' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
-                  }`}>
+                  <div className={`grid size-12 place-items-center rounded-xl shrink-0 ${analysis.overallRiskLevel === 'low' ? 'bg-emerald-50 text-emerald-600' : analysis.overallRiskLevel === 'medium' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                    }`}>
                     <ShieldAlert size={22} />
                   </div>
                   <div>
@@ -148,9 +145,8 @@ export default function AnalysisPage() {
                     </p>
                   </div>
                 </div>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
-                  analysis.overallRiskLevel === 'low' ? 'bg-emerald-100 text-emerald-800' : analysis.overallRiskLevel === 'medium' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
-                }`}>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${analysis.overallRiskLevel === 'low' ? 'bg-emerald-100 text-emerald-800' : analysis.overallRiskLevel === 'medium' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                  }`}>
                   {analysis.overallRiskLevel || 'low'}
                 </span>
               </Card>
@@ -342,7 +338,7 @@ export default function AnalysisPage() {
 
               <Card className="p-6 border border-amber-200 bg-amber-50/5">
                 <h2 className="font-display text-xl font-bold text-amber-700 flex items-center gap-2">
-                  <DollarSign size={19} className="text-amber-600" />
+                  <IndianRupee size={19} className="text-amber-600" />
                   {t('analysis.chargesTitle')}
                 </h2>
                 <div className="mt-4 space-y-3">
@@ -371,6 +367,44 @@ export default function AnalysisPage() {
                 </div>
               </Card>
             </div>
+
+            {/* Relevant Legal References */}
+            <Card className="p-6 border border-slate-100 shadow-sm">
+              <h2 className="font-display text-xl font-bold flex items-center gap-2 text-slate-800">
+                <BookOpen size={19} className="text-brandBlue" />
+                {t('analysis.legalReferencesTitle', 'Relevant Legal References')}
+              </h2>
+              <div className="mt-4">
+                {analysis.relevantLegalReferences && analysis.relevantLegalReferences.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {analysis.relevantLegalReferences.map((ref, index) => (
+                      <div key={index} className="rounded-xl border border-slate-100 p-4 bg-slate-50/30 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-2xs font-extrabold text-slate-600 uppercase tracking-wider">
+                              {ref.sectionArticle || 'Statute'}
+                            </span>
+                            <span className={`rounded-full px-2 py-0.5 text-3xs font-extrabold uppercase tracking-wider shrink-0 ${
+                              ref.confidence === 'high' ? 'bg-emerald-100 text-emerald-800' :
+                              ref.confidence === 'medium' ? 'bg-amber-100 text-amber-800' :
+                              'bg-rose-100 text-rose-800'
+                            }`}>
+                              {ref.confidence || 'medium'}
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-slate-800 text-sm mt-3 leading-snug">{ref.actName}</h3>
+                          <p className="mt-2 text-xs leading-relaxed text-slate-600 font-medium">{ref.whyApplies}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                    {t('analysis.legalReferencesEmpty', 'No specific legal references could be confidently identified for this document.')}
+                  </p>
+                )}
+              </div>
+            </Card>
 
             {/* Conclusion Section */}
             <Card className="p-6 bg-slate-900 text-slate-100 border border-slate-800">

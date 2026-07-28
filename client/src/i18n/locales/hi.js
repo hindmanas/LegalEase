@@ -171,7 +171,9 @@ export default {
       obligationsTitle: "कानूनी दायित्व",
       responsibilitiesTitle: "उपयोगकर्ता की जिम्मेदारियां",
       missingClausesTitle: "लापता और संदिग्ध क्लॉज",
-      conclusionTitle: "अंतिम निष्कर्ष"
+      conclusionTitle: "अंतिम निष्कर्ष",
+      legalReferencesTitle: "प्रासंगिक कानूनी संदर्भ",
+      legalReferencesEmpty: "इस दस्तावेज़ के लिए कोई विशिष्ट कानूनी संदर्भ आत्मविश्वास के साथ पहचाने नहीं जा सके।"
     },
     chat: {
       backLink: "विश्लेषण पर वापस जाएं",

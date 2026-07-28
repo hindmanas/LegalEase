@@ -171,7 +171,9 @@ export default {
       obligationsTitle: "કાનૂની જવાબદારીઓ",
       responsibilitiesTitle: "વપરાશકર્તાની જવાબદારીઓ",
       missingClausesTitle: "ખૂટતી અને શંકાસ્પદ કલમો",
-      conclusionTitle: "અંતિમ નિષ્કર્ષ"
+      conclusionTitle: "અંતિમ નિષ્કર્ષ",
+      legalReferencesTitle: "પ્રાસંગિક કાનૂની સંદર્ભો",
+      legalReferencesEmpty: "આ દસ્તાવેજ માટે કોઈ ચોક્કસ કાનૂની સંદર્ભો આત્મવિશ્વાસપૂર્વક ઓળખી શકાયા નથી."
     },
     chat: {
       backLink: "વિશ્લેષણ પર પાછા જાઓ",

@@ -171,7 +171,9 @@ export default {
       obligationsTitle: "Legal Obligations",
       responsibilitiesTitle: "User Responsibilities",
       missingClausesTitle: "Missing & Suspicious Clauses",
-      conclusionTitle: "Final Conclusion"
+      conclusionTitle: "Final Conclusion",
+      legalReferencesTitle: "Relevant Legal References",
+      legalReferencesEmpty: "No specific legal references could be confidently identified for this document."
     },
     chat: {
       backLink: "Back to analysis",
