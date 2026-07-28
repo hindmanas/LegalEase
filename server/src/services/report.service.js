@@ -64,6 +64,11 @@ export function buildTextReport(document) {
       ? missingSuspiciousClauses.map((m, i) => `${i + 1}. ${m.title}\n   Explanation: ${m.explanation}\n   Potential Impact: ${m.impact}`).join('\n\n')
       : 'No omitted or suspicious clauses flagged.',
     '',
+    '--- Relevant Legal References ---',
+    (analysis.relevantLegalReferences || []).length
+      ? (analysis.relevantLegalReferences || []).map((ref, i) => `${i + 1}. ${ref.actName} [Provision: ${ref.sectionArticle || 'N/A'}] [Confidence: ${(ref.confidence || 'medium').toUpperCase()}]\n   Applicability: ${ref.whyApplies}`).join('\n\n')
+      : 'No specific legal references could be confidently identified for this document.',
+    '',
     '--- Final Conclusion ---',
     analysis.finalConclusion || 'No final conclusion available.',
     '',

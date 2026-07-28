@@ -345,10 +345,10 @@ export default function AnalysisPage() {
                   {(analysis.hiddenChargesPenalties || analysis.hiddenCharges)?.length ? (
                     (analysis.hiddenChargesPenalties || analysis.hiddenCharges).map((charge, index) => (
                       <div key={`${charge.title}-${index}`} className="rounded-lg border border-amber-200 bg-amber-50/30 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="font-bold text-sm text-amber-900">{charge.title}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                          <h3 className="font-bold text-sm text-amber-900 leading-tight">{charge.title}</h3>
                           {charge.amount && (
-                            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-2xs font-bold text-amber-800 shrink-0">
+                            <span className="rounded-lg bg-amber-100 px-2.5 py-0.5 text-2xs font-bold text-amber-800 break-words whitespace-normal self-start sm:self-auto max-w-full sm:max-w-[70%] text-left sm:text-right">
                               {charge.amount}
                             </span>
                           )}

@@ -55,6 +55,16 @@ const missingClauseSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const legalReferenceSchema = new mongoose.Schema(
+  {
+    actName: String,
+    sectionArticle: String,
+    whyApplies: String,
+    confidence: { type: String, enum: ['high', 'medium', 'low'], default: 'medium' }
+  },
+  { _id: false }
+);
+
 const analysisSchema = new mongoose.Schema(
   {
     documentType: String,
@@ -67,6 +77,7 @@ const analysisSchema = new mongoose.Schema(
     legalObligations: [obligationSchema],
     userResponsibilities: [responsibilitySchema],
     missingSuspiciousClauses: [missingClauseSchema],
+    relevantLegalReferences: [legalReferenceSchema],
     recommendations: [String],
     safetyScore: Number,
     overallRiskLevel: { type: String, enum: ['low', 'medium', 'high'], default: 'low' },

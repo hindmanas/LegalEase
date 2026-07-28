@@ -114,6 +114,14 @@ The JSON object MUST contain exactly the following keys and data structures:
   "recommendations": [
     "A clear, actionable recommendation/next step in ${language} (provide 3 to 5 recommendations)"
   ],
+  "relevantLegalReferences": [
+    {
+      "actName": "Name of the Indian Act or Law in ${language} (e.g., 'Indian Contract Act, 1872', 'Transfer of Property Act, 1882')",
+      "sectionArticle": "Relevant Section or Constitutional Article in ${language} (e.g., 'Section 74', 'Section 54', 'Article 21')",
+      "whyApplies": "1–2 concise lines explaining why this legal provision applies to the document in ${language}",
+      "confidence": "Confidence level strictly matching one of 'high', 'medium', or 'low'"
+    }
+  ],
   "safetyScore": 75,
   "overallRiskLevel": "Strictly one of 'low', 'medium', or 'high'",
   "finalConclusion": "A final wrap-up statement or summary conclusion in ${language}.",
@@ -121,6 +129,8 @@ The JSON object MUST contain exactly the following keys and data structures:
     "A relevant, context-specific follow-up question the user might want to ask a chatbot about this document, in ${language} (generate exactly 5 to 6 suggested questions)"
   ]
 }
+
+IMPORTANT: For 'relevantLegalReferences', only list relevant Indian statutory provisions (Acts, Sections, or Constitutional Articles) if you are reasonably confident they apply to this document context. Never invent or guess legal references. If no reliable legal provisions can be confidently identified, return an empty array [].
 
 Document:
 ${text.slice(0, 18000)}
@@ -172,6 +182,7 @@ export async function analyzeLegalText(text, language = 'English') {
     analysisResult.legalObligations = Array.isArray(analysisResult.legalObligations) ? analysisResult.legalObligations : [];
     analysisResult.userResponsibilities = Array.isArray(analysisResult.userResponsibilities) ? analysisResult.userResponsibilities : [];
     analysisResult.missingSuspiciousClauses = Array.isArray(analysisResult.missingSuspiciousClauses) ? analysisResult.missingSuspiciousClauses : [];
+    analysisResult.relevantLegalReferences = Array.isArray(analysisResult.relevantLegalReferences) ? analysisResult.relevantLegalReferences : [];
     analysisResult.recommendations = Array.isArray(analysisResult.recommendations) ? analysisResult.recommendations : [];
     analysisResult.safetyScore = typeof analysisResult.safetyScore === 'number' ? analysisResult.safetyScore : 50;
     analysisResult.overallRiskLevel = ['low', 'medium', 'high'].includes(analysisResult.overallRiskLevel) ? analysisResult.overallRiskLevel : 'medium';
@@ -229,6 +240,9 @@ ${(analysis.userResponsibilities || []).slice(0, 10).map(r => `- ${r.title}: ${r
 
 [Missing/Suspicious Clauses]:
 ${(analysis.missingSuspiciousClauses || []).slice(0, 10).map(m => `- ${m.title}: ${m.explanation} (Impact: ${m.impact})`).join('\n')}
+
+[Relevant Legal References]:
+${(analysis.relevantLegalReferences || []).slice(0, 10).map(ref => `- ${ref.actName} (${ref.sectionArticle || 'N/A'}): ${ref.whyApplies} [Confidence: ${ref.confidence}]`).join('\n')}
 
 [Recommendations]:
 ${(analysis.recommendations || []).slice(0, 10).map(r => `- ${r}`).join('\n')}
