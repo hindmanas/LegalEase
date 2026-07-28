@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Scale, Menu, LogOut, LayoutDashboard, Settings, FileUp, Languages } from 'lucide-react';
+import { Menu, LogOut, LayoutDashboard, Settings, FileUp, Languages } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useTranslation } from 'react-i18next';
+import Logo from '../ui/Logo.jsx';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,9 +28,7 @@ export default function Navbar() {
       <div className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
         <header className={`pointer-events-auto transition-all duration-300 ease-in-out glass-pill px-5 py-3 flex items-center justify-between w-full max-w-5xl ${isScrolled ? 'shadow-lg bg-white/80' : 'bg-white/60'}`}>
           <Link to={user ? "/app/dashboard" : "/"} className="flex items-center gap-3 group">
-            <div className="grid size-9 place-items-center rounded-lg bg-brandBlue text-white shadow-glow transition-transform group-hover:scale-105">
-              <Scale size={18} />
-            </div>
+            <Logo size={36} className="shadow-glow transition-transform group-hover:scale-105" />
             <span className="font-display text-lg font-bold tracking-tight">{t('common.appName')}</span>
           </Link>
           

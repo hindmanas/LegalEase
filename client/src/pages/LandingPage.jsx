@@ -1,11 +1,51 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bot, Share2, Shield, FileCheck2, ShieldAlert, FileText, Scale } from 'lucide-react';
+import { ArrowRight, Bot, Share2, Shield, FileCheck2, ShieldAlert, FileText, Mail, Phone, MapPin, X, Lock } from 'lucide-react';
 import PageTransition from '../components/ui/PageTransition.jsx';
 import Navbar from '../components/layout/Navbar.jsx';
 import { useTranslation } from 'react-i18next';
+import Logo from '../components/ui/Logo.jsx';
 
 export default function LandingPage() {
   const { t } = useTranslation();
+  const [activeModal, setActiveModal] = useState(null);
+
+  const modalContent = {
+    privacy: {
+      title: "Privacy Policy",
+      icon: <Lock className="text-brandBlue" size={24} />,
+      points: [
+        "We collect only essential information such as your name, email, uploaded documents, and AI chat history to provide our services.",
+        "Your uploaded documents remain private. They are not visible to our team, are not manually accessed, and are never used to train or improve any AI model.",
+        "Your documents are processed only to generate AI-powered analysis and chatbot responses for your use.",
+        "We use secure authentication and encrypted communication to protect your personal information and uploaded files.",
+        "You can request the deletion of your account and associated data at any time.",
+        "By using LegalEase, you agree to this Privacy Policy and any future updates."
+      ]
+    },
+    security: {
+      title: "Security Measures",
+      icon: <Shield className="text-brandBlue" size={24} />,
+      points: [
+        "Your account is protected using secure authentication and encrypted connections (HTTPS).",
+        "Uploaded documents and user data are stored securely to prevent unauthorized access.",
+        "AI API keys and sensitive credentials are securely managed on the server.",
+        "We regularly monitor the platform to maintain security and system reliability.",
+        "Users are responsible for keeping their login credentials confidential."
+      ]
+    },
+    terms: {
+      title: "Terms & Conditions",
+      icon: <FileText className="text-brandBlue" size={24} />,
+      points: [
+        "LegalEase provides AI-powered legal document analysis for informational and educational purposes only.",
+        "AI-generated summaries, recommendations, and chatbot responses should not be considered professional legal advice.",
+        "Users must upload only documents they own or have permission to analyze.",
+        "Each user is limited to 3 document analyses per week, with 1 analysis allowed every 24 hours, and 3 AI questions per document.",
+        "LegalEase reserves the right to update these terms or restrict access in case of misuse of the platform."
+      ]
+    }
+  };
 
   return (
     <PageTransition>
@@ -13,23 +53,23 @@ export default function LandingPage() {
         <Navbar />
 
         <main className="pt-32 lg:pt-40 pb-20">
-          
+
           {/* Hero Section */}
           <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center animate-fade-up">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-white/50 backdrop-blur-sm px-4 py-1.5 text-xs font-bold text-slate-600 shadow-sm animate-float">
               <span className="w-2 h-2 rounded-full bg-brandBlue animate-pulse"></span>
               {t('landing.badge')}
             </div>
-            
+
             <h1 className="max-w-4xl font-display text-5xl font-extrabold leading-[1.1] tracking-tight text-ink sm:text-6xl lg:text-[5rem]">
-              {t('landing.title1')} <br/>
+              {t('landing.title1')} <br />
               <span className="text-slate-400">{t('landing.title2')}</span>
             </h1>
-            
+
             <p className="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed text-slate-600 font-medium">
               {t('landing.subtitle')}
             </p>
-            
+
             <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Link to="/register" className="w-full sm:w-auto">
                 <button className="w-full bg-brandBlue text-white hover:bg-blue-700 transition-all duration-300 px-8 py-3.5 rounded-xl text-sm font-semibold flex justify-center items-center gap-2 shadow-glow hover:shadow-float hover:-translate-y-1">
@@ -44,7 +84,7 @@ export default function LandingPage() {
             </div>
 
             {/* Hero Mockup Preview */}
-            <div className="mt-20 w-full max-w-5xl relative animate-fade-up" style={{animationDelay: '0.2s'}}>
+            <div className="mt-20 w-full max-w-5xl relative animate-fade-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-brandBlue to-purple-500 rounded-2xl blur opacity-20 animate-soft-pulse"></div>
               <div className="relative rounded-2xl border border-line bg-white/80 backdrop-blur-lg shadow-2xl overflow-hidden ring-1 ring-black/5">
                 {/* Mockup Header */}
@@ -101,7 +141,7 @@ export default function LandingPage() {
                 {t('landing.workflowSubtitle')}
               </h2>
             </div>
-            
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-0 rounded-2xl border border-line bg-white/40 overflow-hidden shadow-sm backdrop-blur-sm">
               {[
                 ['01', t('landing.step1Title'), t('landing.step1Desc')],
@@ -120,18 +160,18 @@ export default function LandingPage() {
 
           {/* Social Proof Quote */}
           <section className="py-16 flex justify-center px-4">
-             <div className="max-w-3xl text-center">
-                <h3 className="font-display text-3xl sm:text-4xl font-semibold leading-tight text-ink mb-6">
-                  {t('landing.testimonial')}
-                </h3>
-                <div className="flex items-center justify-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-slate-200"></div>
-                   <div className="text-left">
-                      <div className="text-sm font-bold text-ink">{t('landing.testimonialAuthor')}</div>
-                      <div className="text-xs text-slate-500">{t('landing.testimonialRole')}</div>
-                   </div>
+            <div className="max-w-3xl text-center">
+              <h3 className="font-display text-3xl sm:text-4xl font-semibold leading-tight text-ink mb-6">
+                {t('landing.testimonial')}
+              </h3>
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-200"></div>
+                <div className="text-left">
+                  <div className="text-sm font-bold text-ink">{t('landing.testimonialAuthor')}</div>
+                  <div className="text-xs text-slate-500">{t('landing.testimonialRole')}</div>
                 </div>
-             </div>
+              </div>
+            </div>
           </section>
 
           {/* Features Section */}
@@ -142,7 +182,7 @@ export default function LandingPage() {
                 {t('landing.featuresSubtitle')}
               </h2>
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 [ShieldAlert, t('landing.feat1Title'), t('landing.feat1Desc')],
@@ -191,22 +231,136 @@ export default function LandingPage() {
 
         </main>
 
-        {/* Minimal Footer */}
-        <footer className="border-t border-line/50 bg-white/50 backdrop-blur-sm">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-500">
-              <div className="grid size-6 place-items-center rounded bg-brandBlue text-white">
-                <Scale size={12} />
+        {/* Rich Footer */}
+        <footer className="border-t border-line/50 bg-white/60 backdrop-blur-md">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pb-8 border-b border-line/30">
+
+              {/* Left Section: Brand & About */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <Logo size={32} />
+                  <span className="font-display text-lg font-bold tracking-tight text-ink">{t('common.appName')}</span>
+                </div>
+                <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
+                  Enterprise-grade document intelligence for legal professionals. Instantly simplify, analyze, and manage complex contracts securely.
+                </p>
               </div>
-              <span className="text-sm font-medium">{t('landing.rightsReserved')}</span>
+
+              {/* Middle Section: Contact Us */}
+              <div className="flex flex-col gap-4">
+                <h3 className="font-display text-sm font-bold text-ink uppercase tracking-wider">Contact Us</h3>
+                <div className="flex flex-col gap-2.5 text-sm text-slate-500">
+                  <a
+                    href="mailto:teamrydeon@gmail.com"
+                    className="flex items-center gap-2.5 hover:text-brandBlue transition-colors group"
+                  >
+                    <Mail size={16} className="text-slate-400 group-hover:text-brandBlue transition-colors" />
+                    <span>teamrydeon@gmail.com</span>
+                  </a>
+                  <a
+                    href="tel:+919460994039"
+                    className="flex items-center gap-2.5 hover:text-brandBlue transition-colors group"
+                  >
+                    <Phone size={16} className="text-slate-400 group-hover:text-brandBlue transition-colors" />
+                    <span>+91 9460994039</span>
+                  </a>
+                  <div className="flex items-center gap-2.5">
+                    <MapPin size={16} className="text-slate-400" />
+                    <span>Pune, Maharashtra</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Section: Legal Links */}
+              <div className="flex flex-col gap-4">
+                <h3 className="font-display text-sm font-bold text-ink uppercase tracking-wider">Legal</h3>
+                <div className="flex flex-col gap-2.5 text-sm font-semibold text-slate-400">
+                  <button
+                    onClick={() => setActiveModal('privacy')}
+                    className="text-left hover:text-ink transition-colors flex items-center gap-2"
+                  >
+                    {t('landing.privacy')}
+                  </button>
+                  <button
+                    onClick={() => setActiveModal('terms')}
+                    className="text-left hover:text-ink transition-colors flex items-center gap-2"
+                  >
+                    {t('landing.terms')}
+                  </button>
+                  <button
+                    onClick={() => setActiveModal('security')}
+                    className="text-left hover:text-ink transition-colors flex items-center gap-2"
+                  >
+                    {t('landing.security')}
+                  </button>
+                </div>
+              </div>
+
             </div>
-            <div className="flex gap-6 text-sm font-semibold text-slate-400">
-              <a href="#" className="hover:text-ink transition-colors">{t('landing.privacy')}</a>
-              <a href="#" className="hover:text-ink transition-colors">{t('landing.terms')}</a>
-              <a href="#" className="hover:text-ink transition-colors">{t('landing.security')}</a>
+
+            {/* Bottom Row */}
+            <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <span>{t('landing.rightsReserved')}</span>
+              </div>
+              <div className="flex gap-4">
+                <span>Pune, India</span>
+              </div>
             </div>
           </div>
         </footer>
+
+        {/* Modal / Popup for Legal Content */}
+        {activeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+            {/* Overlay background blur */}
+            <div
+              className="absolute inset-0 bg-ink/40 backdrop-blur-sm transition-opacity cursor-pointer"
+              onClick={() => setActiveModal(null)}
+            ></div>
+
+            {/* Modal Card */}
+            <div className="relative bg-white rounded-2xl border border-line shadow-2xl w-full max-w-lg overflow-hidden animate-fade-up z-10">
+              {/* Header */}
+              <div className="p-6 border-b border-line/40 flex justify-between items-center bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  {modalContent[activeModal].icon}
+                  <h3 className="font-display text-xl font-bold text-ink">{modalContent[activeModal].title}</h3>
+                </div>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="text-slate-400 hover:text-ink hover:bg-slate-100 p-2 rounded-lg transition"
+                  aria-label="Close modal"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Content List */}
+              <div className="p-6 max-h-[60vh] overflow-y-auto">
+                <ul className="space-y-4">
+                  {modalContent[activeModal].points.map((point, index) => (
+                    <li key={index} className="flex gap-3 text-slate-600 text-sm leading-relaxed">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brandBlue mt-2 shrink-0"></span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-line/30 flex justify-end bg-slate-50/50">
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="bg-brandBlue hover:bg-brandBlue/90 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </PageTransition>
