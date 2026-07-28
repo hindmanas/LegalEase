@@ -85,50 +85,14 @@ export default function LandingPage() {
 
             {/* Hero Mockup Preview */}
             <div className="mt-20 w-full max-w-5xl relative animate-fade-up" style={{ animationDelay: '0.2s' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-brandBlue to-purple-500 rounded-2xl blur opacity-20 animate-soft-pulse"></div>
-              <div className="relative rounded-2xl border border-line bg-white/80 backdrop-blur-lg shadow-2xl overflow-hidden ring-1 ring-black/5">
-                {/* Mockup Header */}
-                <div className="flex items-center gap-2 border-b border-line px-4 py-3 bg-white/50">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <div className="max-w-[200px] h-6 bg-slate-100 rounded flex items-center px-2 text-[11px] text-slate-400 font-mono">
-                      legalease.app/analysis
-                    </div>
-                  </div>
-                </div>
-                {/* Mockup Body */}
-                <div className="flex h-[300px] sm:h-[400px]">
-                  {/* Sidebar */}
-                  <div className="hidden sm:block w-48 border-r border-line p-4 space-y-4">
-                    <div className="h-4 w-20 bg-slate-100 rounded"></div>
-                    <div className="h-4 w-16 bg-slate-100 rounded"></div>
-                    <div className="h-8 w-full bg-blue-50 text-brandBlue rounded flex items-center px-3 text-xs font-bold">{t('common.appName')}</div>
-                  </div>
-                  {/* Main Content */}
-                  <div className="flex-1 p-6 flex flex-col gap-6 overflow-hidden">
-                    <div className="text-[10px] font-bold text-slate-400 tracking-wider">DOCUMENT</div>
-                    <div className="space-y-4 flex-1">
-                      <div className="h-3 w-3/4 bg-slate-100 rounded-full"></div>
-                      <div className="h-3 w-full bg-slate-100 rounded-full"></div>
-                      <div className="h-3 w-5/6 bg-slate-100 rounded-full"></div>
-                      <div className="h-3 w-4/5 bg-slate-100 rounded-full"></div>
-                      <div className="h-3 w-1/2 bg-slate-100 rounded-full"></div>
-                    </div>
-                  </div>
-                  {/* Right Panel */}
-                  <div className="w-64 border-l border-line bg-slate-50/50 p-4">
-                    <div className="text-[10px] font-bold text-slate-400 tracking-wider mb-4">RISKS</div>
-                    <div className="bg-white border border-red-200 rounded-lg p-3 shadow-sm border-l-2 border-l-red-500">
-                      <div className="text-[10px] font-bold text-red-600 mb-1">CRITICAL</div>
-                      <div className="text-sm font-bold text-ink">Liability cap</div>
-                      <div className="text-xs text-slate-500 mt-1">Includes gross negligence.</div>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative w-full flex h-[240px] xs:h-[300px] sm:h-[380px] md:h-[450px] lg:h-[500px] overflow-hidden bg-transparent">
+                <iframe 
+                  src="/animation.html" 
+                  title="LegalEase Hero Animation"
+                  className="w-full h-full border-none overflow-hidden"
+                  scrolling="no"
+                  loading="lazy"
+                />
               </div>
             </div>
           </section>

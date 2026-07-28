@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>LegalEase AI — Product Demo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@500;600&family=Noto+Sans+Gujarati:wght@500;600&display=swap');
+
+    :root {
+      --ink: #211c33;
+      --violet-deep: #5b3fae;
+      --violet: #8a6ce8;
+      --violet-light: #bda9f4;
+      --mist: #eee7fc;
+      --porcelain: #faf9ff;
+      --white: #ffffff;
+      --red: #ef5b74;
+      --amber: #eea24f;
+      --green: #33c793;
+      --glass: rgba(255, 255, 255, 0.62);
+      --glass-brd: rgba(255, 255, 255, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .stage {
+      position: absolute;
+      width: 1000px;
+      height: 562.5px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin: center center;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    /* ambient blobs */
+    .blob {
+      display: none;
+    }
+
+    .blob1 {
+      width: 38%;
+      height: 60%;
+      left: -10%;
+      top: -15%;
+      background: var(--violet-light);
+      animation: drift1 22s ease-in-out infinite alternate;
+    }
+
+    .blob2 {
+      width: 32%;
+      height: 50%;
+      right: -8%;
+      bottom: -12%;
+      background: var(--violet);
+      opacity: 0.3;
+      animation: drift2 26s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(4%, 5%) scale(1.08);
+      }
+    }
+
+    @keyframes drift2 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(-5%, -4%) scale(1.1);
+      }
+    }
+
+    /* ---------- camera wrap ---------- */
+    .camera {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 1.3s cubic-bezier(.22, .61, .36, 1);
+      transform: scale(1) translate(0, 0);
+    }
+
+    .camera.cam-upload {
+      transform: scale(1.035) translate(0, 0.4%);
+    }
+
+    .camera.cam-scan {
+      transform: scale(1.06) translate(0, 0.2%);
+    }
+
+    .camera.cam-dash {
+      transform: scale(0.99) translate(0, -0.4%);
+    }
+
+    .camera.cam-risk {
+      transform: scale(1.05) translate(-1.2%, 0.6%);
+    }
+
+    .camera.cam-chat {
+      transform: scale(1.05) translate(0.6%, -1%);
+    }
+
+    .camera.cam-lang {
+      transform: scale(1.02) translate(0, 0);
+    }
+
+    .camera.cam-outro {
+      transform: scale(0.88) translate(0, 1%);
+    }
+
+    /* ---------- macbook ---------- */
+    .macbook {
+      position: relative;
+      width: 78%;
+      transition: opacity 1s ease, filter 1s ease;
+    }
+
+    .macbook.fade-out {
+      opacity: 0;
+      filter: blur(6px);
+    }
+
+    .screen-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/10.1;
+      background: linear-gradient(155deg, #2b2740, #141225 70%);
+      border-radius: 16px 16px 6px 6px;
+      padding: 12px 12px 4px;
+      box-shadow: 0 25px 60px -20px rgba(10, 5, 30, 0.55);
+    }
+
+    .notch {
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10%;
+      height: 12px;
+      background: #141225;
+      border-radius: 0 0 8px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .notch::after {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #2a3550;
+    }
+
+    .screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--white);
+      border-radius: 9px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+    }
+
+    .screen::after {
+      /* glass reflection */
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.16) 0%, transparent 30%);
+      pointer-events: none;
+    }
+
+    .base {
+      width: 112%;
+      margin-left: -6%;
+      height: 14px;
+      background: linear-gradient(180deg, #d9d5e6, #b9b4c9);
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 10px 18px -8px rgba(20, 10, 40, 0.35);
+    }
+
+    .base::before {
+      content: '';
+      display: block;
+      margin: 0 auto;
+      width: 14%;
+      height: 5px;
+      background: #9893ab;
+      border-radius: 0 0 4px 4px;
+    }
+
+    /* browser chrome */
+    .browser-bar {
+      height: 9.5%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 3%;
+      background: linear-gradient(180deg, #fbfaff, #f3f0fb);
+      border-bottom: 1px solid #ece7f8;
+      flex-shrink: 0;
+    }
+
+    .dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .dots span:nth-child(1) {
+      background: #ef6a5f;
+    }
+
+    .dots span:nth-child(2) {
+      background: #f4bf4f;
+    }
+
+    .dots span:nth-child(3) {
+      background: #61c454;
+    }
+
+    .url-pill {
+      flex: 1;
+      margin-left: 4%;
+      background: #fff;
+      border: 1px solid #e9e4f7;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: clamp(7px, 1.05vw, 10.5px);
+      color: #8a83a3;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter';
+    }
+
+    .url-pill svg {
+      width: 9px;
+      height: 9px;
+      flex-shrink: 0;
+    }
+
+    .brand-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(7px, 1.1vw, 11px);
+      color: var(--violet-deep);
+    }
+
+    .brand-chip .mark {
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, var(--violet), var(--violet-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-chip .mark svg {
+      width: 8px;
+      height: 8px;
+      stroke: #fff;
+    }
+
+    /* app viewport */
+    .app {
+      position: relative;
+      flex: 1;
+      background: linear-gradient(160deg, #fdfcff, #f4f0fc);
+      overflow: hidden;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: opacity .55s cubic-bezier(.22, .61, .36, 1), transform .55s cubic-bezier(.22, .61, .36, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scene.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* ============ SCENE: UPLOAD ============ */
+    .scene-upload {
+      align-items: center;
+      justify-content: center;
+      gap: 2%;
+      padding: 4%;
+    }
+
+    .upload-title {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(11px, 2.3vw, 20px);
+      color: var(--ink);
+      margin-bottom: 2.5%;
+      text-align: center;
+    }
+
+    .upload-sub {
+      font-size: clamp(7px, 1.3vw, 11px);
+      color: #8983a1;
+      margin-bottom: 4%;
+      text-align: center;
+    }
+
+    .dropzone {
+      width: 52%;
+      aspect-ratio: 5/3;
+      border: 2px dashed #c8bcef;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6%;
+      transition: border-color .5s ease, background .5s ease;
+      position: relative;
+    }
+
+    .dropzone.dropped {
+      border-color: var(--green);
+      border-style: solid;
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .dz-icon {
+      width: 13%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet-light), var(--violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: bob 2.2s ease-in-out infinite;
+    }
+
+    .dropzone.dropped .dz-icon {
+      animation: none;
+      background: linear-gradient(135deg, #5fe0b0, var(--green));
+    }
+
+    .dz-icon svg {
+      width: 46%;
+      height: 46%;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2.2;
+    }
+
+    @keyframes bob {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-6%);
+      }
+    }
+
+    .dz-label {
+      font-size: clamp(7px, 1.3vw, 11px);
+      color: #736c8d;
+      font-weight: 500;
+    }
+
+    .dropzone.dropped .dz-label {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .file-chip {
+      position: absolute;
+      bottom: -8%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid #e6e0f9;
+      border-radius: 10px;
+      padding: 5px 10px;
+      box-shadow: 0 8px 20px -8px rgba(90, 60, 180, 0.3);
+      font-size: clamp(6.5px, 1.15vw, 10px);
+      color: var(--ink);
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(20px) scale(0.85);
+      transition: all .55s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .file-chip.show {
+      opacity: 1;
+      transform: translateY(60%) scale(1);
+    }
+
+    .file-chip svg {
+      width: 11px;
+      height: 11px;
+      stroke: var(--red);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* ============ SCENE: SCAN ============ */
+    .scene-scan {
+      align-items: center;
+      justify-content: center;
+      gap: 4%;
+    }
+
+    .scan-doc {
+      position: relative;
+      width: 24%;
+      aspect-ratio: 3/4;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 15px 30px -12px rgba(90, 60, 180, 0.35);
+      overflow: hidden;
+      padding: 10%;
+    }
+
+    .scan-doc .ln {
+      height: 6%;
+      background: #e9e4f7;
+      border-radius: 3px;
+      margin-bottom: 9%;
+    }
+
+    .scan-doc .ln.w60 {
+      width: 60%;
+    }
+
+    .scan-doc .ln.w80 {
+      width: 80%;
+    }
+
+    .scan-doc .ln.w40 {
+      width: 40%;
+    }
+
+    .scan-laser {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 18%;
+      background: linear-gradient(180deg, transparent, rgba(138, 108, 232, 0.35), rgba(138, 108, 232, 0.55), rgba(138, 108, 232, 0.35), transparent);
+      top: -20%;
+      animation: laser 1.6s linear infinite;
+    }
+
+    @keyframes laser {
+      0% {
+        top: -20%;
+      }
+
+      100% {
+        top: 100%;
+      }
+    }
+
+    .scan-status {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(9px, 1.7vw, 14px);
+      color: var(--violet-deep);
+      text-align: center;
+      min-height: 1.4em;
+    }
+
+    .scan-bar-track {
+      width: 34%;
+      height: 6px;
+      border-radius: 6px;
+      background: #e9e2fa;
+      overflow: hidden;
+    }
+
+    .scan-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--violet), var(--violet-deep));
+      border-radius: 6px;
+      transition: width .25s linear;
+    }
+
+    .scan-pct {
+      font-size: clamp(7px, 1.3vw, 11px);
+      color: #8a83a3;
+      font-weight: 600;
+    }
+
+    /* ============ SCENE: DASHBOARD ============ */
+    .scene-dashboard {
+      padding: 3.5% 3.5% 2%;
+    }
+
+    .dash-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2.2%;
+    }
+
+    .dash-head h2 {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(9px, 1.7vw, 14px);
+      color: var(--ink);
+    }
+
+    .dash-head .safety-pill {
+      font-size: clamp(6.5px, 1.1vw, 9.5px);
+      font-weight: 700;
+      color: var(--green);
+      background: rgba(51, 199, 147, 0.13);
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 2.2%;
+      flex: 1;
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      padding: 8% 8%;
+      display: flex;
+      flex-direction: column;
+      gap: 8%;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity .5s ease, transform .5s ease, box-shadow .4s ease, border-color .4s ease;
+      box-shadow: 0 6px 16px -10px rgba(80, 50, 160, 0.18);
+    }
+
+    .card.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card .ic {
+      width: 22%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card .ic svg {
+      width: 55%;
+      height: 55%;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2.1;
+    }
+
+    .card h3 {
+      font-size: clamp(6px, 1.05vw, 9.5px);
+      font-family: 'Inter';
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .card p {
+      font-size: clamp(5.5px, 0.95vw, 8.5px);
+      color: #847d9c;
+      line-height: 1.35;
+    }
+
+    .ic.c1 {
+      background: linear-gradient(135deg, #9d86ef, #6c4fd8);
+    }
+
+    .ic.c2 {
+      background: linear-gradient(135deg, #7fb0f0, #4c85e0);
+    }
+
+    .ic.c3 {
+      background: linear-gradient(135deg, #8fd2c6, #3fae9c);
+    }
+
+    .ic.c4 {
+      background: linear-gradient(135deg, #f18ba0, var(--red));
+    }
+
+    .ic.c5 {
+      background: linear-gradient(135deg, #f3c27e, var(--amber));
+    }
+
+    .ic.c6 {
+      background: linear-gradient(135deg, #f4d878, #e0ac3f);
+    }
+
+    .ic.c7 {
+      background: linear-gradient(135deg, #6fdcb0, var(--green));
+    }
+
+    .ic.c8 {
+      background: linear-gradient(135deg, #f3a37e, #e07a4c);
+    }
+
+    .card.risk-card {
+      position: relative;
+    }
+
+    .card.risk-card.highlight {
+      border-color: rgba(239, 91, 116, 0.55);
+      box-shadow: 0 0 0 3px rgba(239, 91, 116, 0.18), 0 10px 24px -8px rgba(239, 91, 116, 0.35);
+      transform: translateY(0) scale(1.045);
+      z-index: 2;
+    }
+
+    .risk-badge {
+      position: absolute;
+      top: -8%;
+      right: -6%;
+      background: var(--red);
+      color: #fff;
+      font-size: clamp(5px, 0.85vw, 7.5px);
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 20px;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all .4s cubic-bezier(.34, 1.56, .64, 1);
+      box-shadow: 0 6px 14px -4px rgba(239, 91, 116, 0.6);
+    }
+
+    .risk-badge.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .pulse-ring {
+      position: absolute;
+      inset: -4%;
+      border-radius: 16px;
+      border: 2px solid var(--red);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .pulse-ring.go {
+      animation: pulseRing 1.4s ease-out infinite;
+    }
+
+    @keyframes pulseRing {
+      0% {
+        opacity: 0.55;
+        transform: scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.12);
+      }
+    }
+
+    .score-ring {
+      position: relative;
+      width: 38%;
+      aspect-ratio: 1;
+      align-self: flex-start;
+      margin-top: 2%;
+    }
+
+    .score-ring svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .score-ring circle {
+      fill: none;
+      stroke-width: 3.2;
+    }
+
+    .score-num {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(7px, 1.3vw, 10.5px);
+      color: var(--ink);
+    }
+
+    /* ============ SCENE: CHAT ============ */
+    .scene-chat {
+      padding: 4% 5%;
+    }
+
+    .chat-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3%;
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(8px, 1.5vw, 12.5px);
+      color: var(--ink);
+    }
+
+    .chat-head .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .chat-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 3.5%;
+    }
+
+    .bubble {
+      max-width: 72%;
+      padding: 2.6% 4%;
+      border-radius: 14px;
+      font-size: clamp(6.5px, 1.15vw, 10px);
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(14px) scale(0.97);
+      transition: all .45s cubic-bezier(.22, .61, .36, 1);
+    }
+
+    .bubble.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--violet), var(--violet-deep));
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble.ai {
+      align-self: flex-start;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      backdrop-filter: blur(6px);
+      color: var(--ink);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble.ai b {
+      color: var(--violet-deep);
+    }
+
+    .typing {
+      align-self: flex-start;
+      display: flex;
+      gap: 4px;
+      padding: 2.2% 3.4%;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      border-radius: 14px;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+
+    .typing.show {
+      opacity: 1;
+    }
+
+    .typing span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #a89ccb;
+      animation: tdot 1s ease-in-out infinite;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: .15s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: .3s;
+    }
+
+    @keyframes tdot {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+        opacity: .5;
+      }
+
+      30% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
+    }
+
+    /* ============ SCENE: LANGUAGE ============ */
+    .scene-lang {
+      align-items: center;
+      justify-content: center;
+      gap: 5%;
+      position: relative;
+    }
+
+    .lang-pill-row {
+      position: absolute;
+      top: 5%;
+      right: 5%;
+      display: flex;
+      gap: 6px;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      padding: 5px 6px;
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+    }
+
+    .lang-pill {
+      font-size: clamp(6px, 1.05vw, 9px);
+      font-weight: 700;
+      color: #8a83a3;
+      padding: 3px 8px;
+      border-radius: 14px;
+      transition: all .35s ease;
+    }
+
+    .lang-pill.active {
+      background: linear-gradient(135deg, var(--violet), var(--violet-deep));
+      color: #fff;
+    }
+
+    .lang-card {
+      width: 56%;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      backdrop-filter: blur(6px);
+      border-radius: 16px;
+      padding: 6% 7%;
+      text-align: center;
+    }
+
+    .lang-title {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(10px, 2vw, 17px);
+      color: var(--ink);
+      margin-bottom: 3%;
+      transition: opacity .35s ease;
+    }
+
+    .lang-sub {
+      font-size: clamp(7px, 1.3vw, 11px);
+      color: #847d9c;
+      transition: opacity .35s ease;
+    }
+
+    .lang-fade {
+      opacity: 0;
+    }
+
+    .devanagari {
+      font-family: 'Noto Sans Devanagari', 'Inter';
+    }
+
+    .gujarati {
+      font-family: 'Noto Sans Gujarati', 'Inter';
+    }
+
+    /* ============ OUTRO ============ */
+    .outro {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+      z-index: 5;
+    }
+
+    .outro.show {
+      opacity: 1;
+    }
+
+    .outro .logo {
+      width: 9%;
+      aspect-ratio: 1;
+      border-radius: 22%;
+      background: linear-gradient(135deg, var(--violet-light), var(--violet-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 40px -16px rgba(90, 60, 180, 0.55);
+      margin-bottom: 1%;
+    }
+
+    .outro .logo svg {
+      width: 52%;
+      height: 52%;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .outro .brand {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-size: clamp(9px, 1.7vw, 15px);
+      color: var(--violet-deep);
+      text-transform: uppercase;
+      margin-bottom: 1.5%;
+    }
+
+    .outro .tagline {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(14px, 3.1vw, 28px);
+      text-align: center;
+      line-height: 1.3;
+      background: linear-gradient(100deg, var(--violet-deep), var(--violet) 60%, var(--violet-light));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      padding: 0 6%;
+    }
+
+    .outro .tagline .seg {
+      opacity: 0;
+      display: inline-block;
+      transition: opacity .5s ease, transform .5s ease;
+      transform: translateY(6px);
+    }
+
+    .outro .tagline .seg.on {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="stage" id="stage">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+
+    <div class="camera" id="camera">
+      <div class="macbook" id="macbook">
+        <div class="screen-frame">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="browser-bar">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <div class="url-pill">
+                <svg viewBox="0 0 24 24" stroke="#8a83a3" stroke-width="2.4" fill="none">
+                  <rect x="5" y="10" width="14" height="9" rx="2" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                </svg>
+                app.legalease.ai
+              </div>
+              <div class="brand-chip"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6"
+                    stroke-linecap="round">
+                    <path d="M12 3l7 3v6c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V6z" />
+                  </svg></span>LegalEase AI</div>
+            </div>
+
+            <div class="app">
+
+              <!-- UPLOAD -->
+              <div class="scene scene-upload" id="sc-upload">
+                <div class="upload-title">Upload your legal document</div>
+                <div class="upload-sub">PDF, DOCX supported · Bank-grade encryption</div>
+                <div class="dropzone" id="dropzone">
+                  <div class="dz-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 16V4M7 9l5-5 5 5" />
+                      <path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" />
+                    </svg></div>
+                  <div class="dz-label" id="dzLabel">Drop your document here</div>
+                  <div class="file-chip" id="fileChip">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M6 2h9l5 5v15H6z" />
+                      <path d="M14 2v6h6" stroke="#fff" stroke-width="2" fill="none" />
+                    </svg>
+                    Rental_Agreement.pdf
+                  </div>
+                </div>
+              </div>
+
+              <!-- SCAN -->
+              <div class="scene scene-scan" id="sc-scan">
+                <div class="scan-doc">
+                  <div class="ln w80"></div>
+                  <div class="ln w60"></div>
+                  <div class="ln w40"></div>
+                  <div class="ln w80"></div>
+                  <div class="ln w60"></div>
+                  <div class="ln w40"></div>
+                  <div class="ln w60"></div>
+                  <div class="scan-laser"></div>
+                </div>
+                <div class="scan-status" id="scanStatus">Reading document…</div>
+                <div class="scan-bar-track">
+                  <div class="scan-bar-fill" id="scanFill"></div>
+                </div>
+                <div class="scan-pct" id="scanPct">0%</div>
+              </div>
+
+              <!-- DASHBOARD -->
+              <div class="scene scene-dashboard" id="sc-dash">
+                <div class="dash-head">
+                  <h2>Document Analysis · Rental Agreement</h2>
+                  <div class="safety-pill">Analysis complete</div>
+                </div>
+                <div class="grid">
+                  <div class="card" data-i="1">
+                    <div class="ic c1"><svg viewBox="0 0 24 24">
+                        <path d="M6 2h9l5 5v15H6z" />
+                        <path d="M9 12h6M9 16h6M9 8h3" />
+                      </svg></div>
+                    <h3>Executive Summary</h3>
+                    <p>3 parties · 12-month term</p>
+                  </div>
+                  <div class="card" data-i="2">
+                    <div class="ic c2"><svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 8h.01M11 12h1v5h1" />
+                      </svg></div>
+                    <h3>Key Information</h3>
+                    <p>Landlord: Mehta Estates</p>
+                  </div>
+                  <div class="card" data-i="3">
+                    <div class="ic c3"><svg viewBox="0 0 24 24">
+                        <path d="M6 3h12v18l-6-4-6 4z" />
+                      </svg></div>
+                    <h3>Important Clauses</h3>
+                    <p>Clause 9 · Auto-renewal</p>
+                  </div>
+                  <div class="card risk-card" data-i="4" id="riskCard">
+                    <div class="pulse-ring" id="pulseRing"></div>
+                    <div class="risk-badge" id="riskBadge">3 CRITICAL</div>
+                    <div class="ic c4"><svg viewBox="0 0 24 24">
+                        <path d="M12 2L2 21h20z" />
+                        <path d="M12 10v4M12 17h.01" />
+                      </svg></div>
+                    <h3>Risks &amp; Red Flags</h3>
+                    <p>3 critical flags found</p>
+                  </div>
+                  <div class="card" data-i="5">
+                    <div class="ic c5"><svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M9 12h6M12 9v6" />
+                      </svg></div>
+                    <h3>Hidden Charges</h3>
+                    <p>₹15,000 maintenance fee</p>
+                  </div>
+                  <div class="card" data-i="6">
+                    <div class="ic c6"><svg viewBox="0 0 24 24">
+                        <path d="M9 18h6M10 22h4M12 2a6 6 0 00-4 10c1 1 1.5 2 1.5 3h5c0-1 .5-2 1.5-3a6 6 0 00-4-10z" />
+                      </svg></div>
+                    <h3>Recommendations</h3>
+                    <p>Negotiate exit clause</p>
+                  </div>
+                  <div class="card" data-i="7">
+                    <div class="score-ring">
+                      <svg viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15.5" stroke="#e9e2fa" />
+                        <circle cx="18" cy="18" r="15.5" stroke="url(#g1)" stroke-dasharray="78 100"
+                          stroke-linecap="round" />
+                        <defs>
+                          <linearGradient id="g1">
+                            <stop offset="0%" stop-color="#33c793" />
+                            <stop offset="100%" stop-color="#3fae9c" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div class="score-num"
+                        style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">78
+                      </div>
+                    </div>
+                    <h3>Safety Score</h3>
+                    <p>78 / 100 — Good</p>
+                  </div>
+                  <div class="card" data-i="8">
+                    <div class="ic c8"><svg viewBox="0 0 24 24">
+                        <path d="M4 18a8 8 0 0116 0" />
+                        <path d="M12 18l4-6" />
+                      </svg></div>
+                    <h3>Risk Level</h3>
+                    <p>Medium–High</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CHAT -->
+              <div class="scene scene-chat" id="sc-chat">
+                <div class="chat-head"><span class="dot"></span>AI Legal Assistant</div>
+                <div class="chat-body">
+                  <div class="bubble user" id="chatUser">Can my landlord keep my entire deposit for a small paint
+                    touch-up?</div>
+                  <div class="typing" id="chatTyping"><span></span><span></span><span></span></div>
+                  <div class="bubble ai" id="chatAi">Not fully. Under <b>Section 74, Indian Contract Act, 1872</b>,
+                    deductions must reflect actual loss — not a blanket forfeiture. Normal wear and tear is usually
+                    excluded under most state Rent Control Acts.</div>
+                </div>
+              </div>
+
+              <!-- LANGUAGE -->
+              <div class="scene scene-lang" id="sc-lang">
+                <div class="lang-pill-row">
+                  <div class="lang-pill" id="pillEn">EN</div>
+                  <div class="lang-pill" id="pillHi">HI</div>
+                  <div class="lang-pill" id="pillGu">GU</div>
+                </div>
+                <div class="lang-card">
+                  <div class="lang-title" id="langTitle">Executive Summary</div>
+                  <div class="lang-sub" id="langSub">Rental Agreement · 12 months</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="base"></div>
+      </div>
+    </div>
+
+    <div class="outro" id="outro">
+      <div class="logo"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l7 3v6c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V6z" />
+        </svg></div>
+      <div class="brand">LegalEase AI</div>
+      <div class="tagline" id="tagline">
+        <span class="seg">Upload.</span> <span class="seg">Analyze.</span> <span class="seg">Understand.</span> <span
+          class="seg">Stay&nbsp;Protected.</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    const camera = $('camera');
+    const macbook = $('macbook');
+    const scenes = ['sc-upload', 'sc-scan', 'sc-dash', 'sc-chat', 'sc-lang'].map(id => $(id));
+
+    function setCam(cls) { camera.className = 'camera' + (cls ? ' ' + cls : ''); }
+    function showScene(id) {
+      scenes.forEach(s => s.classList.remove('active'));
+      if (id) $(id).classList.add('active');
+    }
+
+    function resetAll() {
+      showScene(null);
+      setCam('');
+      macbook.classList.remove('fade-out');
+      $('outro').classList.remove('show');
+      $('tagline').querySelectorAll('.seg').forEach(s => s.classList.remove('on'));
+
+      $('dropzone').classList.remove('dropped');
+      $('fileChip').classList.remove('show');
+      $('dzLabel').textContent = 'Drop your document here';
+
+      $('scanFill').style.width = '0%';
+      $('scanPct').textContent = '0%';
+      $('scanStatus').textContent = 'Reading document…';
+
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('in'));
+      $('riskCard').classList.remove('highlight');
+      $('riskBadge').classList.remove('show');
+      $('pulseRing').classList.remove('go');
+
+      $('chatUser').classList.remove('show');
+      $('chatTyping').classList.remove('show');
+      $('chatAi').classList.remove('show');
+
+      ['pillEn', 'pillHi', 'pillGu'].forEach(id => $(id).classList.remove('active'));
+      $('langTitle').className = 'lang-title';
+      $('langSub').className = 'lang-sub';
+    }
+
+    async function playOnce() {
+      resetAll();
+      await sleep(60);
+
+      // ---- UPLOAD ----
+      setCam('cam-upload');
+      showScene('sc-upload');
+      await sleep(900);
+      $('fileChip').classList.add('show');
+      await sleep(700);
+      $('dropzone').classList.add('dropped');
+      $('dzLabel').textContent = 'Uploaded successfully';
+      await sleep(700);
+
+      // ---- SCAN ----
+      setCam('cam-scan');
+      showScene('sc-scan');
+      const statuses = ['Reading document…', 'Identifying clauses…', 'Detecting risks…', 'Finalizing report…'];
+      let pct = 0;
+      const scanDuration = 2100, steps = 40, stepTime = scanDuration / steps;
+      for (let i = 0; i <= steps; i++) {
+        pct = Math.round((i / steps) * 100);
+        $('scanFill').style.width = pct + '%';
+        $('scanPct').textContent = pct + '%';
+        const sIdx = Math.min(statuses.length - 1, Math.floor((i / steps) * statuses.length));
+        $('scanStatus').textContent = statuses[sIdx];
+        await sleep(stepTime);
+      }
+      await sleep(300);
+
+      // ---- DASHBOARD ----
+      setCam('cam-dash');
+      showScene('sc-dash');
+      const cards = document.querySelectorAll('.card');
+      for (let i = 0; i < cards.length; i++) {
+        cards[i].classList.add('in');
+        await sleep(110);
+      }
+      await sleep(700);
+
+      // ---- RISK HIGHLIGHT ----
+      setCam('cam-risk');
+      $('riskCard').classList.add('highlight');
+      $('pulseRing').classList.add('go');
+      await sleep(200);
+      $('riskBadge').classList.add('show');
+      await sleep(1500);
+
+      // ---- CHAT ----
+      setCam('cam-chat');
+      showScene('sc-chat');
+      await sleep(350);
+      $('chatUser').classList.add('show');
+      await sleep(700);
+      $('chatTyping').classList.add('show');
+      await sleep(1100);
+      $('chatTyping').classList.remove('show');
+      $('chatAi').classList.add('show');
+      await sleep(1700);
+
+      // ---- LANGUAGE SWITCH ----
+      setCam('cam-lang');
+      showScene('sc-lang');
+      $('pillEn').classList.add('active');
+      $('langTitle').textContent = 'Executive Summary';
+      $('langSub').textContent = 'Rental Agreement · 12 months';
+      $('langTitle').classList.remove('lang-fade');
+      $('langSub').classList.remove('lang-fade');
+      await sleep(650);
+
+      $('langTitle').classList.add('lang-fade');
+      $('langSub').classList.add('lang-fade');
+      await sleep(320);
+      $('pillEn').classList.remove('active'); $('pillHi').classList.add('active');
+      $('langTitle').className = 'lang-title devanagari';
+      $('langSub').className = 'lang-sub devanagari';
+      $('langTitle').textContent = 'कार्यकारी सारांश';
+      $('langSub').textContent = 'किराया अनुबंध · 12 महीने';
+      await sleep(30);
+      $('langTitle').classList.remove('lang-fade');
+      $('langSub').classList.remove('lang-fade');
+      await sleep(650);
+
+      $('langTitle').classList.add('lang-fade');
+      $('langSub').classList.add('lang-fade');
+      await sleep(320);
+      $('pillHi').classList.remove('active'); $('pillGu').classList.add('active');
+      $('langTitle').className = 'lang-title gujarati';
+      $('langSub').className = 'lang-sub gujarati';
+      $('langTitle').textContent = 'એક્ઝિક્યુટિવ સારાંશ';
+      $('langSub').textContent = 'ભાડા કરાર · 12 મહિના';
+      await sleep(30);
+      $('langTitle').classList.remove('lang-fade');
+      $('langSub').classList.remove('lang-fade');
+      await sleep(750);
+
+      // ---- OUTRO ----
+      setCam('cam-outro');
+      macbook.classList.add('fade-out');
+      await sleep(500);
+      $('outro').classList.add('show');
+      const segs = $('tagline').querySelectorAll('.seg');
+      for (const seg of segs) {
+        seg.classList.add('on');
+        await sleep(320);
+      }
+      await sleep(1400);
+    }
+
+    function resizeStage() {
+      const stage = $('stage');
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scaleX = vw / 1000;
+      const scaleY = vh / 562.5;
+      const scale = Math.min(scaleX, scaleY);
+      stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+
+    window.addEventListener('resize', resizeStage);
+    window.addEventListener('DOMContentLoaded', resizeStage);
+    resizeStage();
+
+    (async function loop() {
+      while (true) {
+        await playOnce();
+      }
+    })();
+  </script>
+</body>
+
+</html>
