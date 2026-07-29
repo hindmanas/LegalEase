@@ -30,7 +30,7 @@ Set one of these in `server/.env`:
 
 ```bash
 AI_PROVIDER=openai
-OPENAI_API_KEY=your_key
+GROQ_apI=your_key
 ```
 
 or
