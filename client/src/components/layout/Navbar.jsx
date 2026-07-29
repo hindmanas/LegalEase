@@ -31,12 +31,12 @@ export default function Navbar() {
             <Logo size={36} className="shadow-glow transition-transform group-hover:scale-105" />
             <span className="font-display text-lg font-bold tracking-tight">{t('common.appName')}</span>
           </Link>
-          
+
           <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
             {!user ? (
               <>
-                <a href="/#features" className="hover:text-brandBlue transition-colors">{t('navbar.features')}</a>
                 <a href="/#workflow" className="hover:text-brandBlue transition-colors">{t('navbar.howItWorks')}</a>
+                <a href="/#features" className="hover:text-brandBlue transition-colors">{t('navbar.features')}</a>
                 <a href="/#pricing" className="hover:text-brandBlue transition-colors">{t('navbar.pricing')}</a>
               </>
             ) : (
@@ -47,7 +47,7 @@ export default function Navbar() {
               </>
             )}
           </nav>
-          
+
           <div className="hidden items-center gap-4 md:flex">
             {/* Desktop Language Selector */}
             <div className="flex items-center gap-1.5 border border-line rounded-full px-2.5 py-1 bg-white/40 hover:border-brandBlue transition-all">
@@ -89,7 +89,7 @@ export default function Navbar() {
             )}
           </div>
 
-          <button 
+          <button
             className="md:hidden text-ink p-2 rounded-full hover:bg-black/5 transition"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -115,7 +115,7 @@ export default function Navbar() {
               </>
             )}
           </nav>
-          
+
           <div className="mt-8 flex flex-col gap-4">
             {/* Mobile Language Selector */}
             <div className="flex flex-col gap-2">

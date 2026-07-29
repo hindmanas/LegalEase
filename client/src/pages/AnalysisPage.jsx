@@ -407,7 +407,7 @@ export default function AnalysisPage() {
             </Card>
 
             {/* Conclusion Section */}
-            <Card className="p-6 bg-slate-900 text-slate-100 border border-slate-800">
+            <section className="rounded-lg border border-slate-800 bg-slate-900 shadow-soft p-6 text-slate-100">
               <h2 className="font-display text-xl font-bold flex items-center gap-2 text-white">
                 <ShieldCheck size={20} className="text-emerald-400" />
                 {t('analysis.conclusionTitle', 'Final Conclusion')}
@@ -415,7 +415,7 @@ export default function AnalysisPage() {
               <p className="mt-4 text-sm leading-7 text-slate-300 whitespace-pre-wrap">
                 {analysis.finalConclusion || 'No final conclusion available.'}
               </p>
-            </Card>
+            </section>
 
             {/* Row 7: Chat with AI Callout */}
             <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex flex-col md:flex-row md:items-center justify-between gap-4">

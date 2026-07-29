@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bot, Share2, Shield, FileCheck2, ShieldAlert, FileText, Mail, Phone, MapPin, X, Lock } from 'lucide-react';
+import { ArrowRight, Bot, Share2, Shield, FileCheck2, ShieldAlert, FileText, Mail, Phone, MapPin, X, Lock, Check } from 'lucide-react';
 import PageTransition from '../components/ui/PageTransition.jsx';
 import Navbar from '../components/layout/Navbar.jsx';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,16 @@ export default function LandingPage() {
         "Each user is limited to 3 document analyses per week, with 1 analysis allowed every 24 hours, and 3 AI questions per document.",
         "LegalEase reserves the right to update these terms or restrict access in case of misuse of the platform."
       ]
+    },
+    comingSoon: {
+      title: "Coming Soon",
+      icon: <Bot className="text-brandBlue" size={24} />,
+      points: [
+        "Pro Plan features are currently in active development.",
+        "We are integrating advanced semantic search capabilities for even higher analysis precision.",
+        "Priority AI responses and enhanced legal references will be available soon.",
+        "Thank you for your patience! We will notify all users once the Pro tier goes live."
+      ]
     }
   };
 
@@ -63,7 +73,7 @@ export default function LandingPage() {
 
             <h1 className="max-w-4xl font-display text-5xl font-extrabold leading-[1.1] tracking-tight text-ink sm:text-6xl lg:text-[5rem]">
               {t('landing.title1')} <br />
-              <span className="text-slate-400">{t('landing.title2')}</span>
+              {t('landing.title2')}
             </h1>
 
             <p className="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed text-slate-600 font-medium">
@@ -165,6 +175,83 @@ export default function LandingPage() {
                   <p className="mt-3 text-sm leading-relaxed text-slate-600">{copy}</p>
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* Pricing Section */}
+          <section id="pricing" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 border-t border-line/30">
+            <div className="mb-12 text-center flex flex-col items-center">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-brandBlue mb-4">
+                {t('landing.pricingTitle')}
+              </p>
+              <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight max-w-xl leading-tight text-ink">
+                {t('landing.pricingSubtitle')}
+              </h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+              {/* Free Plan */}
+              <div className="glass-card p-8 group relative overflow-hidden flex flex-col justify-between border border-line/60 hover:border-brandBlue/30 hover:shadow-float hover:-translate-y-2 transition-all duration-500 ease-out">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brandBlue/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                <div>
+                  <h3 className="font-display text-2xl font-bold text-ink mb-2">
+                    {t('landing.freePlanName')}
+                  </h3>
+                  <div className="flex items-baseline gap-1.5 my-4">
+                    <span className="font-display text-5xl font-extrabold text-ink">{t('landing.freePlanPrice')}</span>
+                    <span className="text-sm font-medium text-slate-500">/ {t('landing.freePlanPeriod')}</span>
+                  </div>
+                  
+                  <ul className="space-y-4 my-8">
+                    {(t('landing.freePlanFeatures', { returnObjects: true }) || []).map((feature, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-slate-800">
+                        <Check size={18} className="text-brandBlue mt-0.5 shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <Link to="/register" className="w-full">
+                  <button className="w-full bg-white text-ink border border-line hover:border-slate-300 transition-all duration-300 py-3.5 rounded-xl font-semibold text-center text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                    {t('landing.planSelectBtn')} <ArrowRight size={16} />
+                  </button>
+                </Link>
+              </div>
+
+              {/* Pro Plan */}
+              <div className="glass-card p-8 group relative overflow-hidden flex flex-col justify-between border-2 border-brandBlue/20 hover:border-brandBlue/50 hover:shadow-float hover:-translate-y-2 transition-all duration-500 ease-out">
+                {/* Most Popular Badge */}
+                <div className="absolute top-4 right-4 bg-brandBlue text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm animate-soft-pulse z-10">
+                  {t('landing.proPlanBadge')}
+                </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brandBlue/10 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                <div>
+                  <h3 className="font-display text-2xl font-bold text-ink mb-2">
+                    {t('landing.proPlanName')}
+                  </h3>
+                  <div className="flex items-baseline gap-1.5 my-4">
+                    <span className="font-display text-5xl font-extrabold text-ink">{t('landing.proPlanPrice')}</span>
+                    <span className="text-sm font-medium text-slate-500">/ {t('landing.proPlanPeriod')}</span>
+                  </div>
+
+                  <ul className="space-y-4 my-8">
+                    {(t('landing.proPlanFeatures', { returnObjects: true }) || []).map((feature, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-slate-800">
+                        <Check size={18} className="text-brandBlue mt-0.5 shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button 
+                  onClick={() => setActiveModal('comingSoon')}
+                  className="w-full bg-brandBlue text-white hover:bg-blue-700 transition-all duration-300 py-3.5 rounded-xl font-semibold text-center text-sm flex items-center justify-center gap-2 shadow-glow shadow-brandBlue/10 hover:shadow-brandBlue/25"
+                >
+                  {t('landing.proPlanSelectBtn')} <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
           </section>
 
