@@ -30,8 +30,11 @@ export async function chatWithDocument(req, res, next) {
 
     const answer = await answerDocumentQuestion(document, question.trim(), targetLanguage, history);
     
-    document.questionCount = currentCount + 1;
-    await document.save();
+    const rejectionMessage = "This question is outside the scope of the uploaded document. Please ask questions related to this document only.";
+    if (answer !== rejectionMessage) {
+      document.questionCount = currentCount + 1;
+      await document.save();
+    }
 
     res.json({ answer, questionCount: document.questionCount });
   } catch (error) {

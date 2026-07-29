@@ -202,6 +202,100 @@ export async function analyzeLegalText(text, language = 'English') {
   return analysisResult;
 }
 
+export async function classifyLegalDocument(text) {
+  const prompt = `You are a legal document classifier.
+Analyze the following document text and determine if it is a valid legal document or not.
+
+Legal documents include:
+- Agreements (e.g., Service Agreement, NDA, Lease Agreement, Employment Contract, MOU, Partnership Agreement, etc.)
+- Contracts
+- Affidavits
+- Legal Notices
+- Court Documents
+- Government Legal Documents
+- Terms & Conditions / Privacy Policies
+- Licenses
+- And similar legally binding or court/official legal documents.
+
+Non-legal documents include:
+- Resumes and CVs
+- Invoices and Receipts
+- Assignments and Homework
+- Research Papers and Articles
+- Books and Notes
+- Certificates and Reports
+- General non-legal documents.
+
+Return ONLY a valid JSON object with the following structure:
+{
+  "isLegalDocument": true or false,
+  "confidence": a number from 0 to 1,
+  "reason": "Brief explanation of the classification"
+}
+
+Do NOT wrap the response in markdown code blocks (\`\`\`json / \`\`\`). Return ONLY the raw JSON string.
+
+Document text:
+${text.slice(0, 15000)}
+`;
+
+  let responseText;
+  if (groqApiKey) {
+    const groq = new Groq({ apiKey: groqApiKey });
+    const model = process.env.GROQ_ANALYSIS_MODEL || GROQ_MODELS.LLAMA_3_3_70B;
+    responseText = await callGroqChatCompletion(groq, [
+      { role: 'user', content: prompt }
+    ], model);
+  } else {
+    const provider = process.env.AI_PROVIDER;
+    if (provider === 'openai' && process.env.OPENAI_API_KEY) {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const response = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.2
+      });
+      responseText = response.choices[0].message.content;
+    } else {
+      throw new Error('AI analysis is not configured. Please ensure GROQ_API_KEY is defined in your server .env file.');
+    }
+  }
+
+  try {
+    const result = extractJson(responseText);
+    return !!result.isLegalDocument;
+  } catch (err) {
+    console.error('Failed to parse legal document classification response:', err);
+    const textLower = responseText.toLowerCase();
+    if (textLower.includes('"islegaldocument": true') || textLower.includes('"islegaldocument":true')) {
+      return true;
+    }
+    if (textLower.includes('"islegaldocument": false') || textLower.includes('"islegaldocument":false')) {
+      return false;
+    }
+    return true;
+  }
+}
+
+export function isGreetingOrTimeQuery(question) {
+  const q = question.toLowerCase().trim();
+  // Greetings
+  const greetings = [
+    'hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening',
+    'namaste', 'hola', 'bonjour', 'sup', 'yo', 'hi there', 'hello there'
+  ];
+  if (greetings.includes(q)) return true;
+  if (/^(hi|hello|hey|greetings|namaste|hola|bonjour)[\s,!.]*$/i.test(q)) return true;
+
+  // Time/Date queries
+  const timeDateKeywords = ['date', 'time', 'day'];
+  const hasTimeDate = timeDateKeywords.some(keyword => q.includes(keyword));
+  const isQuestion = q.includes('what') || q.includes('today') || q.includes('now');
+  if (hasTimeDate && isQuestion) return true;
+
+  return false;
+}
+
 export async function answerDocumentQuestion(document, question, language = 'English', history = []) {
   let chunksContext = '';
   let topChunks = [];
@@ -211,6 +305,36 @@ export async function answerDocumentQuestion(document, question, language = 'Eng
     chunksContext = topChunks.map((c, i) => `[Excerpt ${i + 1}]: ${c.text}`).join('\n\n');
   } catch (err) {
     console.error('Failed to retrieve chunks for QA context:', err);
+  }
+
+  const isGreetingOrTime = isGreetingOrTimeQuery(question);
+
+  if (!isGreetingOrTime) {
+    const isOpenAI = process.env.AI_PROVIDER === 'openai' && process.env.OPENAI_API_KEY;
+    let isRelevant = false;
+
+    if (isOpenAI) {
+      const maxSimilarity = topChunks.length > 0 ? Math.max(...topChunks.map(c => c.similarity ?? 0)) : 0;
+      isRelevant = maxSimilarity >= 0.25;
+    } else {
+      const keywords = question.toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .split(/\s+/)
+        .filter(w => w.length > 3 && !['what', 'where', 'when', 'how', 'who', 'whom', 'which', 'why', 'this', 'that', 'these', 'those', 'their', 'there', 'here', 'with', 'about', 'from', 'your', 'have', 'does', 'contract', 'document', 'agreement'].includes(w));
+      
+      if (keywords.length === 0) {
+        const allWords = question.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 1);
+        const docTextLower = (document.extractedText || '').toLowerCase();
+        isRelevant = allWords.some(w => docTextLower.includes(w));
+      } else {
+        const docTextLower = (document.extractedText || '').toLowerCase();
+        isRelevant = keywords.some(w => docTextLower.includes(w));
+      }
+    }
+
+    if (!isRelevant) {
+      return "This question is outside the scope of the uploaded document. Please ask questions related to this document only.";
+    }
   }
 
   const analysis = document.analysis || {};
@@ -258,7 +382,7 @@ ${chunksContext || document.extractedText.slice(0, 12000)}
 
   const systemPrompt = `You are a helpful, expert Indian Legal AI Assistant.
 The user is asking questions about an uploaded legal document.
-You must answer using the uploaded document, its stored analysis, retrieved context, and the chat history.
+You must answer using ONLY the uploaded document, its stored analysis, retrieved context, and the chat history.
 
 Current Date: ${dateStr}
 Current Day: ${dayStr}
@@ -269,8 +393,10 @@ Strict Guidelines:
 2. NEVER guess, fabricate, or make up legal provisions, acts, sections, or articles. If you are uncertain of the exact legal provision or act, you must clearly state in ${language} that the exact legal provision cannot be confidently identified.
 3. If the user's question is related to the document (e.g. asking about obligations, termination, risks, clauses, summary, details, specific terms, etc.), you must answer it accurately based on the provided document context and analysis.
 4. If the user's question is a simple greeting (like "hi", "hello", "hey"), or a basic query about today's date, day, or time, answer it directly using the current date/day/time provided.
-5. If the user's question is completely unrelated to the document or legal context (e.g., "how to communicate", "how to calculate bmi", "how to code", general knowledge, history, math, health, cooking, etc.), you must politely decline to answer. State clearly that you can only answer questions related to the document or legal analysis.
-6. Your response must be generated ENTIRELY in ${language} (including all legal reasoning, references, and greetings).
+5. If the user's question is unrelated to the uploaded document, you must strictly refuse to answer. You must return EXACTLY the following rejection message and nothing else (do not add any explanation, introductory words, or other text):
+"This question is outside the scope of the uploaded document. Please ask questions related to this document only."
+6. NEVER answer general knowledge, programming, mathematics, current affairs, or unrelated legal questions. If the user asks about these, return EXACTLY the rejection message above.
+7. Your response must be generated ENTIRELY in ${language} (including all legal reasoning, references, and greetings), except when returning the predefined English rejection message.
 
 Here is the document context and analysis:
 ${documentContext}`;

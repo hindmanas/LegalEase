@@ -125,14 +125,20 @@ export async function searchRelevantChunks(documentId, queryText, k = 5) {
       const results = await chromaColl.query({
         queryEmbeddings: [queryVector],
         nResults: k,
-        where: { documentId: documentId.toString() }
+        where: { documentId: documentId.toString() },
+        include: ['documents', 'metadatas', 'embeddings']
       });
 
       if (results && results.documents && results.documents[0]) {
-        return results.documents[0].map((docText, index) => ({
-          text: docText,
-          metadata: results.metadatas[0][index]
-        }));
+        return results.documents[0].map((docText, index) => {
+          const chunkEmbedding = results.embeddings && results.embeddings[0] ? results.embeddings[0][index] : null;
+          const similarity = chunkEmbedding ? cosineSimilarity(queryVector, chunkEmbedding) : 0;
+          return {
+            text: docText,
+            metadata: results.metadatas[0][index],
+            similarity
+          };
+        });
       }
     } catch (err) {
       console.error('ChromaDB query failed, falling back to database query:', err);

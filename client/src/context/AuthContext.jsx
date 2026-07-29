@@ -116,6 +116,25 @@ export function AuthProvider({ children }) {
           i18n.changeLanguage(lang);
         }
       },
+      async changePassword({ currentPassword, newPassword }) {
+        if (!user || !user.email) {
+          throw new Error('User email not found');
+        }
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password: currentPassword
+        });
+        if (signInError) {
+          throw new Error('Incorrect current password');
+        }
+        const { data, error: updateError } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+        if (updateError) {
+          throw updateError;
+        }
+        return data;
+      },
       async logout() {
         await supabase.auth.signOut();
       }

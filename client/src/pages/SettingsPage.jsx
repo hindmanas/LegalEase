@@ -9,9 +9,10 @@ import PageTransition from '../components/ui/PageTransition.jsx';
 import { useTranslation } from 'react-i18next';
 
 export default function SettingsPage() {
-  const { user, refreshUser, changeLanguage } = useAuth();
+  const { user, refreshUser, changeLanguage, changePassword } = useAuth();
   const { t, i18n } = useTranslation();
   const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '' });
+  const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' });
   const [status, setStatus] = useState('');
   const [pwdStatus, setPwdStatus] = useState('');
   const [saving, setSaving] = useState(false);
@@ -40,10 +41,24 @@ export default function SettingsPage() {
     }
   }
 
-  function handlePasswordSubmit(e) {
+  async function handlePasswordSubmit(e) {
     e.preventDefault();
-    setPwdStatus(t('settings.passChanged'));
-    setTimeout(() => setPwdStatus(''), 3000);
+    setPwdStatus('');
+    if (passwords.newPassword.length < 8) {
+      setPwdStatus(t('auth.passwordPlaceholder'));
+      return;
+    }
+    try {
+      await changePassword({
+        currentPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword
+      });
+      setPwdStatus(t('settings.passChanged'));
+      setPasswords({ currentPassword: '', newPassword: '' });
+      setTimeout(() => setPwdStatus(''), 5000);
+    } catch (err) {
+      setPwdStatus(err.message || 'Failed to update password');
+    }
   }
 
   return (
@@ -73,8 +88,22 @@ export default function SettingsPage() {
             <Card className="p-6 animate-fade-up" style={{ animationDelay: '0.2s' }}>
               <h2 className="font-display text-xl font-bold">{t('settings.securityTitle')}</h2>
               <form onSubmit={handlePasswordSubmit} className="mt-5 space-y-4">
-                <Input label={t('settings.fieldCurrPass')} type="password" placeholder="••••••••" required />
-                <Input label={t('settings.fieldNewPass')} type="password" placeholder={t('auth.passwordPlaceholder')} required />
+                <Input
+                  label={t('settings.fieldCurrPass')}
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  value={passwords.currentPassword}
+                  onChange={(event) => setPasswords({ ...passwords, currentPassword: event.target.value })}
+                />
+                <Input
+                  label={t('settings.fieldNewPass')}
+                  type="password"
+                  placeholder={t('auth.passwordPlaceholder')}
+                  required
+                  value={passwords.newPassword}
+                  onChange={(event) => setPasswords({ ...passwords, newPassword: event.target.value })}
+                />
                 {pwdStatus && <p className="text-sm font-semibold text-brandBlue">{pwdStatus}</p>}
                 <Button type="submit" className="bg-ink hover:bg-slate-800 text-white border-none">
                   <Lock size={17} />

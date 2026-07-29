@@ -3,6 +3,7 @@ import Chunk from '../models/Chunk.js';
 import { createDocument, findDocumentByIdForUser, isMemoryStore, listDocumentsByUser, deleteDocumentForUser } from '../repositories/memoryStore.js';
 import { extractTextFromFile, extractTextFromBuffer } from '../services/parser.service.js';
 import { uploadToSupabase, downloadFromSupabase, deleteFromSupabase } from '../services/supabase.service.js';
+import { classifyLegalDocument } from '../services/ai.service.js';
 import { AppError } from '../utils/AppError.js';
 import fs from 'fs/promises';
 import https from 'https';
@@ -100,6 +101,17 @@ export async function uploadDocument(req, res, next) {
       }
     } else {
       throw new AppError('Please upload a document or provide a Supabase storage path', 400);
+    }
+
+    // Verify if it is a legal document
+    const isLegal = await classifyLegalDocument(extractedText);
+    if (!isLegal) {
+      if (supabasePath && supabasePath !== (req.file ? req.file.path : null)) {
+        await deleteFromSupabase(supabasePath, req.headers.authorization).catch((err) => {
+          console.error('Failed to cleanup rejected non-legal document from Supabase storage:', err);
+        });
+      }
+      throw new AppError('This platform currently supports only legal documents. Please upload a valid legal document.', 400);
     }
 
     const payload = {
