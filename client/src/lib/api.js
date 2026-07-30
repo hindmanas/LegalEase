@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 import { supabase } from './supabase.js';
 
 async function getAuthToken() {
@@ -15,7 +15,7 @@ async function request(path, options = {}) {
   const isFormData = options.body instanceof FormData;
   const headers = await authHeaders();
   const currentLang = localStorage.getItem('language') || 'en';
-  
+
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {

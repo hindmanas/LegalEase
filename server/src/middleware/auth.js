@@ -14,10 +14,15 @@ export async function authenticate(req, _res, next) {
     }
 
     // Verify using Supabase JWT Secret if provided, otherwise fallback
-    const secret = process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET || 'development-only-change-me';
+    const secret = process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET;
+    if (!secret || secret === 'development-only-change-me') {
+      if (process.env.NODE_ENV === 'production') {
+        throw new AppError('Insecure or missing JWT secret key in production environment', 500);
+      }
+    }
     let payload;
     try {
-      payload = jwt.verify(token, secret);
+      payload = jwt.verify(token, secret || 'development-only-change-me');
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('\x1b[33m[Auth Warning]\x1b[0m Supabase JWT verification failed. Falling back to decoding without signature verification for local testing.');

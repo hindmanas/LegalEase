@@ -9,7 +9,7 @@ let collection = null;
 async function getChromaCollection() {
   if (chromaAvailable === false) return null;
   try {
-    const client = new ChromaClient({ path: process.env.CHROMA_URL || 'http://localhost:8000' });
+    const client = new ChromaClient({ path: process.env.CHROMA_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000') });
     // Simple heartbeat check to verify ChromaDB is running
     await client.heartbeat();
     chromaAvailable = true;
