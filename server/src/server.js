@@ -20,6 +20,12 @@ export function createServer() {
   app.use(cors({ origin: allowedOrigins, credentials: true }));
   app.use(express.json({ limit: '1mb' }));
   app.use(morgan('dev'));
+  app.get('/', (_req, res) => {
+    res.json({
+      status: 'success',
+      message: 'LegalEase Backend is running 🚀'
+    });
+  });
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', service: 'legal-ease-api' });
