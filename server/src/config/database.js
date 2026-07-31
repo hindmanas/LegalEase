@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 import { initializeDemoUser } from '../repositories/memoryStore.js';
 
 export async function connectDatabase() {
-  const uri = process.env.MONGODB_URI || (process.env.NODE_ENV === 'production' ? '' : 'mongodb://127.0.0.1:27017/legal-ease-ai');
+  const uri = process.env.MONGODB_URI;
 
-  if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
-    console.error('CRITICAL ERROR: MONGODB_URI environment variable is required in production mode!');
+  if (!uri) {
+    console.error('CRITICAL ERROR: MONGODB_URI environment variable is required!');
     process.exit(1);
   }
 

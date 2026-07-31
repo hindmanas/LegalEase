@@ -19,10 +19,8 @@ npm install
 copy server\.env.example server\.env
 npm run dev
 ```
-
-Client: `http://localhost:5173`
-
-API: `http://localhost:5000`
+Client URL: Set `CLIENT_URL` in backend `.env` (defaults to local `http://localhost:5173` in development)
+API URL: Set `VITE_API_URL` in frontend `.env` (defaults to local `http://localhost:5000/api` in development)
 
 ## AI Providers
 

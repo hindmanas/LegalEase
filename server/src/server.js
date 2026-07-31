@@ -12,8 +12,11 @@ export function createServer() {
   const app = express();
 
   app.use(helmet());
-  const clientUrl = process.env.CLIENT_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5173');
-  const allowedOrigins = clientUrl ? clientUrl.split(',').map(url => url.trim()) : [];
+  const allowedOrigins = ['http://localhost:5173'];
+  if (process.env.CLIENT_URL) {
+    const urls = process.env.CLIENT_URL.split(',').map(url => url.trim());
+    allowedOrigins.push(...urls);
+  }
   app.use(cors({ origin: allowedOrigins, credentials: true }));
   app.use(express.json({ limit: '1mb' }));
   app.use(morgan('dev'));
