@@ -8,17 +8,5 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: legal-ease-chromadb
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    volumes:
-      - chroma-data:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
-
 volumes:
   mongo-data:
-  chroma-data:
