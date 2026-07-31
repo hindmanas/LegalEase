@@ -19,9 +19,3 @@ bootstrap().catch((error) => {
   console.error('Failed to start server:', error);
   process.exit(1);
 });
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "success",
-    message: "LegalEase Backend is running successfully 🚀"
-  });
-});
