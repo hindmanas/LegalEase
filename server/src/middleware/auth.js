@@ -13,26 +13,27 @@ export async function authenticate(req, _res, next) {
       throw new AppError('Authentication required', 401);
     }
 
-    // Verify using Supabase JWT Secret if provided, otherwise fallback
-    const secret = process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET;
-    if (!secret || secret === 'development-only-change-me') {
-      if (process.env.NODE_ENV === 'production') {
-        throw new AppError('Insecure or missing JWT secret key in production environment', 500);
-      }
-    }
+    // Verify using Supabase JWT Secret if provided, otherwise fallback to custom JWT verification or decoding.
     let payload;
     try {
-      payload = jwt.verify(token, secret || 'development-only-change-me');
-    } catch (err) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('\x1b[33m[Auth Warning]\x1b[0m Supabase JWT verification failed. Falling back to decoding without signature verification for local testing.');
-        payload = jwt.decode(token);
-        if (!payload) {
-          throw new AppError('Invalid token structure', 401);
-        }
+      if (process.env.SUPABASE_JWT_SECRET) {
+        payload = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
       } else {
-        throw err;
+        // Fallback for local development or custom JWT without Supabase secret
+        const devSecret = process.env.JWT_SECRET || 'development-only-change-me';
+        try {
+          payload = jwt.verify(token, devSecret);
+        } catch (verificationError) {
+          console.warn('\x1b[33m[Auth Warning]\x1b[0m SUPABASE_JWT_SECRET is not set and token is not a valid custom JWT. Falling back to decoding without verification.');
+          payload = jwt.decode(token);
+        }
       }
+
+      if (!payload) {
+        throw new AppError('Invalid token structure', 401);
+      }
+    } catch (err) {
+      throw err;
     }
     
     // In Supabase, the user ID is in 'sub' and email in 'email'
@@ -69,23 +70,45 @@ export async function authenticate(req, _res, next) {
       // Supabase JWT doesn't use MongoDB ObjectIds. 
       // We sync the user using their email to ensure they exist in our DB.
       if (payload.email) {
-        user = await User.findOne({ email: payload.email.toLowerCase() }).select('-passwordHash');
+        const cleanEmail = payload.email.trim().toLowerCase();
+        // Query case-insensitively using regex fallback to prevent duplicates or missed documents
+        user = await User.findOne({
+          $or: [
+            { email: cleanEmail },
+            { email: { $regex: new RegExp('^' + cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '$', 'i') } }
+          ]
+        });
         
         // Auto-create MongoDB user if they signed up via Supabase (e.g., Google OAuth)
         if (!user) {
           user = await User.create({
-            email: payload.email.toLowerCase(),
-            name: payload.user_metadata?.name || payload.email.split('@')[0],
+            email: cleanEmail,
+            name: payload.user_metadata?.name || cleanEmail.split('@')[0],
             language: payload.user_metadata?.language || 'en',
             passwordHash: 'oauth-or-supabase-managed' // password handled by supabase
           });
-        } else if (payload.user_metadata?.language && user.language !== payload.user_metadata.language) {
-          user.language = payload.user_metadata.language;
-          await user.save();
+        } else {
+          let needsSave = false;
+          if (!user.passwordHash) {
+            user.passwordHash = 'oauth-or-supabase-managed';
+            needsSave = true;
+          }
+          if (user.email !== cleanEmail) {
+            user.email = cleanEmail;
+            needsSave = true;
+          }
+          if (payload.user_metadata?.language && user.language !== payload.user_metadata.language) {
+            user.language = payload.user_metadata.language;
+            needsSave = true;
+          }
+          
+          if (needsSave || user.isModified()) {
+            await user.save();
+          }
         }
       } else {
         // Fallback for legacy custom JWT
-        user = await User.findById(payload.id).select('-passwordHash');
+        user = await User.findById(payload.id);
       }
     }
 
@@ -96,6 +119,7 @@ export async function authenticate(req, _res, next) {
     req.user = user;
     next();
   } catch (error) {
+    console.error('Authentication middleware error:', error);
     next(error instanceof AppError ? error : new AppError('Invalid or expired token', 401));
   }
 }

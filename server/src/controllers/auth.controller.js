@@ -85,7 +85,7 @@ export async function updateProfile(req, res, next) {
 export async function getQuota(req, res, next) {
   try {
     const user = req.user;
-    
+
     // 1. Process weekly cycle reset dynamically
     const now = new Date();
     const cycleDuration = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -95,9 +95,9 @@ export async function getQuota(req, res, next) {
       user.quotaLastAnalyzedAt = null;
       await user.save();
     }
-    
+
     const docsRemaining = Math.max(0, 3 - (user.quotaAnalyzedCount || 0));
-    
+
     // 2. Next analysis availability calculation
     let nextAnalysisAvailableInMs = 0;
     const cooldownDuration = 24 * 60 * 60 * 1000; // 24 hours
@@ -107,17 +107,17 @@ export async function getQuota(req, res, next) {
         nextAnalysisAvailableInMs = cooldownDuration - elapsed;
       }
     }
-    
+
     // 3. Weekly reset date calculation
     let weeklyResetDate = null;
     if (user.quotaCycleStart) {
       weeklyResetDate = new Date(new Date(user.quotaCycleStart).getTime() + cycleDuration);
     }
-    
+
     // 4. Questions remaining on the most recently analyzed document
     let questionsRemaining = 3;
     let currentDocName = null;
-    
+
     let currentDoc = null;
     if (isMemoryStore()) {
       const { listDocumentsByUser } = await import('../repositories/memoryStore.js');
@@ -126,12 +126,12 @@ export async function getQuota(req, res, next) {
     } else {
       currentDoc = await Document.findOne({ user: user._id, status: 'analyzed' }).sort({ updatedAt: -1 });
     }
-    
+
     if (currentDoc) {
       questionsRemaining = Math.max(0, 3 - (currentDoc.questionCount || 0));
       currentDocName = currentDoc.originalName;
     }
-    
+
     res.json({
       documentsRemaining: docsRemaining,
       nextAnalysisAvailableInMs,

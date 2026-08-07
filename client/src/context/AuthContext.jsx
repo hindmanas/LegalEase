@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
           password,
         });
         if (error) throw error;
-        
+
         // Sync language from user metadata after login
         if (data.user?.user_metadata?.language) {
           const lang = data.user.user_metadata.language;
@@ -73,8 +73,8 @@ export function AuthProvider({ children }) {
         } else {
           // If metadata language doesn't exist, save local storage language to remote
           const localLang = localStorage.getItem('language') || 'en';
-          await supabase.auth.updateUser({ data: { language: localLang } }).catch(() => {});
-          await api.updateProfile({ language: localLang }).catch(() => {});
+          await supabase.auth.updateUser({ data: { language: localLang } }).catch(() => { });
+          await api.updateProfile({ language: localLang }).catch(() => { });
         }
         return data;
       },
@@ -84,6 +84,7 @@ export function AuthProvider({ children }) {
           email,
           password,
           options: {
+            emailRedirectTo: window.location.origin,
             data: {
               name,
               language: localLang

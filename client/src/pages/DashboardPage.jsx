@@ -16,13 +16,30 @@ export default function DashboardPage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    Promise.all([
-      api.listDocuments().then((data) => setDocuments(data.documents)),
-      api.getQuota().then((data) => setQuota(data)).catch((err) => console.error("Failed to load quota:", err))
-    ]).finally(() => {
-      setLoading(false);
-      setQuotaLoading(false);
-    });
+    setLoading(true);
+    setQuotaLoading(true);
+
+    api.listDocuments()
+      .then((data) => {
+        setDocuments(data.documents || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load documents:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+    api.getQuota()
+      .then((data) => {
+        setQuota(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load quota:", err);
+      })
+      .finally(() => {
+        setQuotaLoading(false);
+      });
   }, []);
 
   const handleDelete = async (docId, docName) => {
