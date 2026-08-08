@@ -52,42 +52,87 @@ The application supports multiple languages for a more accessible user experienc
 ### 🔐 Privacy-Focused
 LegalEase is designed with document privacy in mind. Uploaded documents are processed for the requested analysis and are not intended to be used for training AI models.
 
+### 🛠️ Tech Stack
+
+| Category | Technologies | Purpose |
+|---|---|---|
+| **Frontend** | React.js, Vite | Build the web application interface |
+| **Styling** | Tailwind CSS, CSS | Responsive and modern UI |
+| **Routing** | React Router | Client-side navigation |
+| **Animations** | Framer Motion | UI animations and transitions |
+| **Backend** | Node.js, Express.js | REST APIs and server-side logic |
+| **Authentication** | Supabase Auth | Email authentication and Google OAuth |
+| **Database** | MongoDB, MongoDB Atlas | Store application data, documents, chunks|
+| **File Storage** | Supabase Storage | Store uploaded legal documents |
+| **AI** | Groq API | Legal document analysis and AI responses |
+| **Models** | Groq API | Llama 3.3 70B, Groq Llama 3.3 70B, Groq Llama 3.3 70B-Thinking |
+| **Embeddings** | Groq API | Generate vector representations of document content |
+| **RAG** | Custom RAG Pipeline | Retrieve relevant document context for AI responses |
+| **Semantic Search** | Cosine Similarity | Find relevant sections of uploaded documents |
+| **Document Processing** | PDF/DOCX Text Extraction | Extract text from uploaded documents |
+| **Internationalization** | i18next | Multi-language support |
+| **Security** | Helmet, CORS | API security and cross-origin protection |
+| **Deployment** | Vercel, Render | Frontend and backend deployment |
+| **Version Control** | Git, GitHub | Source code management |
+
+
+
 ---
 
 ## 🧠 How It Works
 
 ```text
-             ┌──────────────────┐
-             │   Upload Legal   │
-             │     Document     │
-             └────────┬─────────┘
-                      ↓
-             ┌──────────────────┐
-             │ Text Extraction  │
-             └────────┬─────────┘
-                      ↓
-             ┌──────────────────┐
-             │ Document Chunking│
-             └────────┬─────────┘
-                      ↓
-             ┌──────────────────┐
-             │    Embeddings    │
-             └────────┬─────────┘
-                      ↓
-             ┌──────────────────┐
-             │ Semantic Search  │
-             └────────┬─────────┘
-                      ↓
-             ┌──────────────────┐
-             │   AI Analysis    │
-             └────────┬─────────┘
-                      ↓
-       ┌──────────────┼──────────────┐
-       ↓              ↓              ↓
-   Risk Detection   Legal Mapping   AI Chat
-       │              │              │
-       └──────────────┼──────────────┘
-                      ↓
-             ┌──────────────────┐
-             │ Analysis Report  │
-             └──────────────────┘
+                    ┌─────────────────────┐
+                    │       User          │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   React Frontend    │
+                    │       (Vite)        │
+                    └──────────┬──────────┘
+                               │
+                         Upload Document
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Express API      │
+                    │      Backend        │
+                    └──────────┬──────────┘
+                               │
+                ┌──────────────┼──────────────┐
+                │              │              │
+                ▼              ▼              ▼
+          Supabase         Document       MongoDB
+           Storage         Processing      Database
+                │              │
+                │              ▼
+                │       Text Extraction
+                │              │
+                │              ▼
+                │         Text Chunking
+                │              │
+                │              ▼
+                │         Embeddings
+                │              │
+                │              ▼
+                └──────► MongoDB
+                               │
+                               ▼
+                       AI Analysis / RAG
+                               │
+                 ┌─────────────┼─────────────┐
+                 ▼             ▼             ▼
+            Risk Detection  Legal Mapping  AI Chat
+                 │             │             │
+                 └─────────────┼─────────────┘
+                               ▼
+                       Analysis Results
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    React Frontend   │
+                    │  Dashboard / Report │
+                    └─────────────────────┘
+
+
