@@ -1,50 +1,93 @@
-# AI Legal Document Simplifier
+# ⚖️ LegalEase AI
 
-A polished full-stack SaaS application for uploading legal documents, extracting text, simplifying legal language, detecting risk, generating summaries, and chatting with the document.
+> **Understand your legal documents before you sign them.**
 
-## Stack
+LegalEase AI is an AI-powered legal document analysis platform designed to help users understand complex legal documents in simple language.
 
-- React + Vite + Tailwind CSS
-- Node.js + Express
-- MongoDB + Mongoose
-- Supabase authentication
-- Multer file uploads
-- `pdf-parse` and `mammoth` document extraction
-- OpenAI or Gemini integration with a local fallback analyzer for development
+It analyzes uploaded legal documents, identifies important clauses and potential risks, maps relevant Acts, Laws and Sections, and allows users to ask questions based specifically on their uploaded document.
 
-## Quick Start
+🔗 **Live Demo:** https://legal-ease-client-cyan.vercel.app/
 
-```bash
-npm install
-copy server\.env.example server\.env
-npm run dev
-```
-Client URL: Set `CLIENT_URL` in backend `.env` (defaults to local `http://localhost:5173` in development)
-API URL: Set `VITE_API_URL` in frontend `.env` (defaults to local `http://localhost:5000/api` in development)
+---
 
-## AI Providers
+## 🚀 Why LegalEase?
 
-Set one of these in `server/.env`:
+Legal documents can be difficult to understand because of complex terminology, lengthy clauses, and legal language.
 
-```bash
-AI_PROVIDER=openai
-GROQ_apI=your_key
-```
+Imagine having a contract that you need to sign within a limited amount of time. Instead of manually going through every clause or sharing a sensitive document with a general-purpose AI tool, LegalEase provides a dedicated environment for analyzing legal documents.
 
-or
+The goal is simple:
 
-```bash
-AI_PROVIDER=gemini
-GEMINI_API_KEY=your_key
-```
+> **Upload → Analyze → Understand → Ask Questions → Make Better Decisions**
 
-Without a key, the backend uses a deterministic local fallback so the portfolio flow remains demoable.
-Updating the functionalities:
-Added the multilanguage model in the plateform
-languages which are currently added are as follow:
-English(it would be default)
-Hindi 
-Gujrati
+---
 
-We have added gemini flash model to get interaction with the ai chatbot
-but currently api is not able to fetch the data from the document.
+## ✨ Key Features
+
+### 📄 AI Document Analysis
+Upload a legal document and receive an AI-powered analysis covering important clauses, key terms, and potential concerns.
+
+### ⚠️ Risk Detection
+Identifies potentially risky or unusual clauses and categorizes their importance to help users focus on critical parts of a document.
+
+### ⚖️ Acts, Laws & Sections
+Shows relevant legal Acts, Laws, Rules and Sections associated with the uploaded document, along with:
+- Act / Law name
+- Relevant Section
+- Why it applies
+- Confidence indicator
+
+### 💬 Document-Based AI Chat
+Ask questions about your uploaded document and receive answers based on the document's content rather than general-purpose answers.
+
+### 🔎 Semantic Search
+Uses embeddings and semantic similarity to retrieve the most relevant sections of a document before generating an answer.
+
+### 📊 Analysis Report
+Generate a structured report containing important findings from the document.
+
+### 🌐 Multi-Language Support
+The application supports multiple languages for a more accessible user experience.
+
+### 🔐 Privacy-Focused
+LegalEase is designed with document privacy in mind. Uploaded documents are processed for the requested analysis and are not intended to be used for training AI models.
+
+---
+
+## 🧠 How It Works
+
+```text
+             ┌──────────────────┐
+             │   Upload Legal   │
+             │     Document     │
+             └────────┬─────────┘
+                      ↓
+             ┌──────────────────┐
+             │ Text Extraction  │
+             └────────┬─────────┘
+                      ↓
+             ┌──────────────────┐
+             │ Document Chunking│
+             └────────┬─────────┘
+                      ↓
+             ┌──────────────────┐
+             │    Embeddings    │
+             └────────┬─────────┘
+                      ↓
+             ┌──────────────────┐
+             │ Semantic Search  │
+             └────────┬─────────┘
+                      ↓
+             ┌──────────────────┐
+             │   AI Analysis    │
+             └────────┬─────────┘
+                      ↓
+       ┌──────────────┼──────────────┐
+       ↓              ↓              ↓
+   Risk Detection   Legal Mapping   AI Chat
+       │              │              │
+       └──────────────┼──────────────┘
+                      ↓
+             ┌──────────────────┐
+             │ Analysis Report  │
+             └──────────────────┘
