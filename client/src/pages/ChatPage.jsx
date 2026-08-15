@@ -5,31 +5,53 @@ import { api } from '../lib/api.js';
 import Button from '../components/ui/Button.jsx';
 import Card from '../components/ui/Card.jsx';
 import PageTransition from '../components/ui/PageTransition.jsx';
+import Skeleton from '../components/ui/Skeleton.jsx';
 import { useTranslation } from 'react-i18next';
 
 export default function ChatPage() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
   const [document, setDocument] = useState(null);
+  const [docLoading, setDocLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [languageSelected, setLanguageSelected] = useState(false);
   const scrollRef = useRef(null);
 
-  // Ask for language preference at the start
+  // Load document and set initial message/limit state
   useEffect(() => {
-    setMessages([
-      {
-        role: 'assistant',
-        content: "Hello! Please select your preferred language to continue / कृपया आगे बढ़ने के लिए अपनी पसंदीदा भाषा चुनें / ચાલુ રાખવા માટે કૃપા કરીને તમારી પસંદગીની ભાષા પસંદ કરો"
-      }
-    ]);
-  }, []);
-
-  useEffect(() => {
-    api.getDocument(id).then((data) => setDocument(data.document));
-  }, [id]);
+    setDocLoading(true);
+    api.getDocument(id)
+      .then((data) => {
+        const doc = data.document;
+        setDocument(doc);
+        
+        const qCount = doc?.questionCount || 0;
+        if (qCount >= 3) {
+          setLanguageSelected(true);
+          setMessages([
+            {
+              role: 'assistant',
+              content: t('chat.limitReached', 'You have reached the maximum number of AI questions for this document.')
+            }
+          ]);
+        } else {
+          setMessages([
+            {
+              role: 'assistant',
+              content: "Hello! Please select your preferred language to continue / कृपया आगे बढ़ने के लिए अपनी पसंदीदा भाषा चुनें / ચાલુ રાખવા માટે કૃપા કરીને તમારી પસંદગીની ભાષા પસંદ કરો"
+            }
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load document:", err);
+      })
+      .finally(() => {
+        setDocLoading(false);
+      });
+  }, [id, t]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -112,23 +134,40 @@ export default function ChatPage() {
 
         <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-thin sm:p-6">
-            {messages.map((message, index) => (
-              <div key={index} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {message.role === 'assistant' && (
-                  <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-fern text-white">
-                    <Bot size={17} />
-                  </div>
-                )}
-                <div className={`max-w-[82%] rounded-lg px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'bg-ink text-white' : 'bg-mist text-slate-700'}`}>
-                  {message.content}
+            {docLoading ? (
+              <div className="space-y-5 animate-pulse">
+                <div className="flex gap-3">
+                  <Skeleton className="size-9 shrink-0" />
+                  <Skeleton className="h-16 w-2/3" />
                 </div>
-                {message.role === 'user' && (
-                  <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-white text-ink shadow-sm">
-                    <UserRound size={17} />
-                  </div>
-                )}
+                <div className="flex gap-3 justify-end">
+                  <Skeleton className="h-12 w-1/3" />
+                  <Skeleton className="size-9 shrink-0" />
+                </div>
+                <div className="flex gap-3">
+                  <Skeleton className="size-9 shrink-0" />
+                  <Skeleton className="h-12 w-1/2" />
+                </div>
               </div>
-            ))}
+            ) : (
+              messages.map((message, index) => (
+                <div key={index} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {message.role === 'assistant' && (
+                    <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-fern text-white">
+                      <Bot size={17} />
+                    </div>
+                  )}
+                  <div className={`max-w-[82%] rounded-lg px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'bg-ink text-white' : 'bg-mist text-slate-700'}`}>
+                    {message.content}
+                  </div>
+                  {message.role === 'user' && (
+                    <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-white text-ink shadow-sm">
+                      <UserRound size={17} />
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
             {loading && (
               <div className="flex gap-3">
                 <div className="grid size-9 place-items-center rounded-lg bg-fern text-white">
@@ -171,7 +210,7 @@ export default function ChatPage() {
                   {t('chat.suggestedTitle', 'Suggested Questions')}
                 </p>
                 <div className="flex flex-col gap-2 max-w-xl">
-                  {document.analysis.suggestedQuestions.map((q, idx) => (
+                  {(document?.analysis?.suggestedQuestions || []).map((q, idx) => (
                     <button
                       key={idx}
                       onClick={() => askQuestion(q)}
@@ -200,10 +239,10 @@ export default function ChatPage() {
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
                 placeholder={isLimitReached ? t('chat.limitReached') : languageSelected ? t('chat.placeholder') : "Please select your preferred language..."}
-                disabled={!languageSelected || loading || isLimitReached}
+                disabled={docLoading || !languageSelected || loading || isLimitReached}
                 className="h-12 min-w-0 flex-1 rounded-lg border border-line bg-white px-4 text-sm outline-none transition focus:border-fern focus:ring-4 focus:ring-fern/10 disabled:opacity-50"
               />
-              <Button type="submit" disabled={loading || !languageSelected || !question.trim() || isLimitReached} className="px-4">
+              <Button type="submit" disabled={docLoading || loading || !languageSelected || !question.trim() || isLimitReached} className="px-4">
                 <Send size={17} />
                 <span className="hidden sm:inline">{t('chat.sendBtn')}</span>
               </Button>

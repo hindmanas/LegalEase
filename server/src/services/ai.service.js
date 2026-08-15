@@ -3,10 +3,11 @@ import Groq from 'groq-sdk';
 
 // Supported Groq models
 export const GROQ_MODELS = {
-  // Llama 3.3 70B - High performance, great for reasoning, complex tasks like analysis
-  LLAMA_3_3_70B: 'llama-3.3-70b-versatile',
-  // Llama 3.1 8B - High speed, low latency, token efficient, ideal for quick chat/QA
-  LLAMA_3_1_8B: 'llama-3.1-8b-instant',
+  // GPT-OSS 120B - Recommended for complex legal document analysis
+  GPT_OSS_120B: 'openai/gpt-oss-120b',
+
+  // GPT-OSS 20B - Faster model for document-specific chat and Q&A
+  GPT_OSS_20B: 'openai/gpt-oss-20b',
   // Mixtral 8x7B - Strong reasoning capabilities
   MIXTRAL_8X7B: 'mixtral-8x7b-32768',
   // Gemma 2 9B - Highly efficient instruction tuned model
@@ -141,7 +142,7 @@ export async function analyzeLegalText(text, language = 'English') {
   let analysisResult;
   if (groqApiKey) {
     const groq = new Groq({ apiKey: groqApiKey });
-    const model = process.env.GROQ_ANALYSIS_MODEL || GROQ_MODELS.LLAMA_3_3_70B;
+    const model = process.env.GROQ_ANALYSIS_MODEL || GROQ_MODELS.GPT_OSS_120B;
     const responseText = await callGroqChatCompletion(groq, [
       { role: 'user', content: analysisPrompt(text, language) }
     ], model);
@@ -242,7 +243,7 @@ ${text.slice(0, 15000)}
   let responseText;
   if (groqApiKey) {
     const groq = new Groq({ apiKey: groqApiKey });
-    const model = process.env.GROQ_ANALYSIS_MODEL || GROQ_MODELS.LLAMA_3_3_70B;
+    const model = process.env.GROQ_ANALYSIS_MODEL || GROQ_MODELS.GPT_OSS_120B;
     responseText = await callGroqChatCompletion(groq, [
       { role: 'user', content: prompt }
     ], model);
@@ -321,7 +322,7 @@ export async function answerDocumentQuestion(document, question, language = 'Eng
         .replace(/[^\w\s]/g, '')
         .split(/\s+/)
         .filter(w => w.length > 3 && !['what', 'where', 'when', 'how', 'who', 'whom', 'which', 'why', 'this', 'that', 'these', 'those', 'their', 'there', 'here', 'with', 'about', 'from', 'your', 'have', 'does', 'contract', 'document', 'agreement'].includes(w));
-      
+
       if (keywords.length === 0) {
         const allWords = question.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 1);
         const docTextLower = (document.extractedText || '').toLowerCase();
@@ -338,7 +339,7 @@ export async function answerDocumentQuestion(document, question, language = 'Eng
   }
 
   const analysis = document.analysis || {};
-  
+
   const documentContext = `
 Document Name: ${document.originalName}
 Document Type: ${analysis.documentType || 'Unknown'}
@@ -403,7 +404,7 @@ ${documentContext}`;
 
   if (groqApiKey) {
     const groq = new Groq({ apiKey: groqApiKey });
-    const model = process.env.GROQ_CHAT_MODEL || GROQ_MODELS.LLAMA_3_1_8B;
+    const model = process.env.GROQ_CHAT_MODEL || GROQ_MODELS.GPT_OSS_20B;
 
     const messages = [
       { role: 'system', content: systemPrompt }

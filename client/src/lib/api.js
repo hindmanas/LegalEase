@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || '';
+let API_URL = import.meta.env.VITE_API_URL || '';
+if (API_URL && !API_URL.endsWith('/api')) {
+  API_URL = API_URL.replace(/\/$/, '') + '/api';
+}
 import { supabase } from './supabase.js';
 
 async function getAuthToken() {
