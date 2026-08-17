@@ -65,7 +65,7 @@ LegalEase is designed with document privacy in mind. Uploaded documents are proc
 | **Database** | MongoDB, MongoDB Atlas | Store application data, documents, chunks|
 | **File Storage** | Supabase Storage | Store uploaded legal documents |
 | **AI** | Groq API | Legal document analysis and AI responses |
-| **Models** | Groq API | Llama 3.3 70B, Groq Llama 3.3 70B, Groq Llama 3.3 70B-Thinking |
+| **Models** | Groq API | , openai/gpt-oss-120b, Groq Llama 3.3 70B-Thinking |
 | **Embeddings** | Groq API | Generate vector representations of document content |
 | **RAG** | Custom RAG Pipeline | Retrieve relevant document context for AI responses |
 | **Semantic Search** | Cosine Similarity | Find relevant sections of uploaded documents |
