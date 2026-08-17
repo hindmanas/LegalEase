@@ -136,49 +136,42 @@ LegalEase is designed with document privacy in mind. Uploaded documents are proc
                     └─────────────────────┘
 
 
-### ⚙️ Requirements
+## ⚙️ Requirements
 
-Before installing LegalEase AI, make sure you have the following installed/configured:
+Before installing **LegalEase AI**, make sure the following requirements are available on your system:
 
-- Node.js 18+
-- npm
-- Git
-- MongoDB / MongoDB Atlas
-- Supabase account & project
-- Groq account & API key
-- Supabase Storage bucket for document uploads
+- **Node.js 18+**
+- **npm**
+- **Git**
+- **MongoDB / MongoDB Atlas**
+- **Supabase account and project**
+- **Groq account and API key**
+- **Supabase Storage** with a `documents` bucket
 
-### Required Services
+---
 
-| Service | Requirement |
+## 🔧 Required Services
+
+| Service | Purpose |
 |---|---|
-| Node.js | 18 or higher |
-| MongoDB Atlas | Database |
-| Supabase | Authentication & document storage |
-| Groq | AI analysis and document chat |
-| Git | Clone and manage the repository |
+| **Node.js 18+** | Run the frontend and backend |
+| **npm** | Install and manage project dependencies |
+| **Git** | Clone and manage the repository |
+| **MongoDB Atlas** | Store application and document data |
+| **Supabase** | Authentication and document storage |
+| **Groq API** | AI-powered document analysis and chat |
 
-### Required Environment Variables
+---
 
-### Frontend (`client/.env`)
+## 🔐 Environment Variables
+
+LegalEase requires environment variables for connecting the frontend, backend, database, authentication, storage, and AI services.
+
+### Frontend Environment Variables
+
+Create a `.env` file inside the `client` folder:
 
 ```env
 VITE_API_URL=your_backend_url
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-#### Backend (`server/.env`)
-
-```env
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-CLIENT_URL=http://localhost:5173
-
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-GROQ_API_KEY=your_groq_api_key
-GROQ_ANALYSIS_MODEL=openai/gpt-oss-120b
-GROQ_CHAT_MODEL=openai/gpt-oss-20b
