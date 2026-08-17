@@ -136,3 +136,49 @@ LegalEase is designed with document privacy in mind. Uploaded documents are proc
                     └─────────────────────┘
 
 
+### ⚙️ Requirements
+
+Before installing LegalEase AI, make sure you have the following installed/configured:
+
+- Node.js 18+
+- npm
+- Git
+- MongoDB / MongoDB Atlas
+- Supabase account & project
+- Groq account & API key
+- Supabase Storage bucket for document uploads
+
+### Required Services
+
+| Service | Requirement |
+|---|---|
+| Node.js | 18 or higher |
+| MongoDB Atlas | Database |
+| Supabase | Authentication & document storage |
+| Groq | AI analysis and document chat |
+| Git | Clone and manage the repository |
+
+### Required Environment Variables
+
+### Frontend (`client/.env`)
+
+```env
+VITE_API_URL=your_backend_url
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+#### Backend (`server/.env`)
+
+```env
+NODE_ENV=development
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+CLIENT_URL=http://localhost:5173
+
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+GROQ_API_KEY=your_groq_api_key
+GROQ_ANALYSIS_MODEL=openai/gpt-oss-120b
+GROQ_CHAT_MODEL=openai/gpt-oss-20b
