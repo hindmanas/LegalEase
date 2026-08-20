@@ -96,8 +96,8 @@ export default function LandingPage() {
             {/* Hero Mockup Preview */}
             <div className="mt-20 w-full max-w-5xl relative animate-fade-up" style={{ animationDelay: '0.2s' }}>
               <div className="relative w-full flex h-[240px] xs:h-[300px] sm:h-[380px] md:h-[450px] lg:h-[500px] overflow-hidden bg-transparent">
-                <iframe 
-                  src="/animation.html" 
+                <iframe
+                  src="/animation.html"
                   title="LegalEase Hero Animation"
                   className="w-full h-full border-none overflow-hidden"
                   scrolling="no"
@@ -201,7 +201,7 @@ export default function LandingPage() {
                     <span className="font-display text-5xl font-extrabold text-ink">{t('landing.freePlanPrice')}</span>
                     <span className="text-sm font-medium text-slate-500">/ {t('landing.freePlanPeriod')}</span>
                   </div>
-                  
+
                   <ul className="space-y-4 my-8">
                     {(t('landing.freePlanFeatures', { returnObjects: true }) || []).map((feature, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm text-slate-800">
@@ -211,7 +211,7 @@ export default function LandingPage() {
                     ))}
                   </ul>
                 </div>
-                
+
                 <Link to="/register" className="w-full">
                   <button className="w-full bg-white text-ink border border-line hover:border-slate-300 transition-all duration-300 py-3.5 rounded-xl font-semibold text-center text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
                     {t('landing.planSelectBtn')} <ArrowRight size={16} />
@@ -245,7 +245,7 @@ export default function LandingPage() {
                   </ul>
                 </div>
 
-                <button 
+                <button
                   onClick={() => setActiveModal('comingSoon')}
                   className="w-full bg-brandBlue text-white hover:bg-blue-700 transition-all duration-300 py-3.5 rounded-xl font-semibold text-center text-sm flex items-center justify-center gap-2 shadow-glow shadow-brandBlue/10 hover:shadow-brandBlue/25"
                 >
@@ -308,13 +308,6 @@ export default function LandingPage() {
                   >
                     <Mail size={16} className="text-slate-400 group-hover:text-brandBlue transition-colors" />
                     <span>teamrydeon@gmail.com</span>
-                  </a>
-                  <a
-                    href="tel:+919460994039"
-                    className="flex items-center gap-2.5 hover:text-brandBlue transition-colors group"
-                  >
-                    <Phone size={16} className="text-slate-400 group-hover:text-brandBlue transition-colors" />
-                    <span>+91 9460994039</span>
                   </a>
                   <div className="flex items-center gap-2.5">
                     <MapPin size={16} className="text-slate-400" />
